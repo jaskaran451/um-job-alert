@@ -1,0 +1,593 @@
+#!/usr/bin/env python3
+"""Monitor public University of Manitoba job postings and send new-job alerts."""
+
+from __future__ import annotations
+
+import argparse
+import html
+import json
+import logging
+import os
+import re
+import smtplib
+import ssl
+import sys
+import tempfile
+import urllib.parse
+import urllib.request
+from dataclasses import asdict, dataclass
+from datetime import datetime, timezone
+from email.message import EmailMessage
+from pathlib import Path
+from typing import Iterable, Sequence
+
+from playwright.sync_api import Error as PlaywrightError
+from playwright.sync_api import Page, TimeoutError as PlaywrightTimeoutError
+from playwright.sync_api import sync_playwright
+
+
+LOGGER = logging.getLogger("um_job_alert")
+
+DEFAULT_SOURCE_URLS = (
+    "https://viprecprod.ad.umanitoba.ca/B",  # Sessional and student academic
+    "https://viprecprod.ad.umanitoba.ca/S",  # Support staff
+)
+
+SOURCE_NAMES = {
+    "A": "Academic and research",
+    "B": "Sessional and student academic",
+    "P": "Professional and management",
+    "S": "Support staff",
+    "T": "Trades and services",
+}
+
+# These defaults focus on opportunities most likely to be useful to a
+# Computer Engineering student. Set ALERT_ALL=true to receive every posting.
+DEFAULT_INCLUDE_KEYWORDS = (
+    "teaching assistant",
+    "TA/Demo",
+    "grader/marker",
+    "lab demonstrator",
+    "tutor",
+    "COMP",
+    "ECE",
+    "computer science",
+    "engineering",
+)
+
+REQUISITION_PATTERN = re.compile(
+    r"Requisition\s+No:\s*(?P<id>\d+)\s*-\s*Category:\s*(?P<category>.+)",
+    re.IGNORECASE,
+)
+
+
+@dataclass(frozen=True)
+class Job:
+    requisition_id: str
+    title: str
+    category: str
+    job_type: str
+    location: str
+    posting_date: str
+    source: str
+    source_url: str
+    detail_url: str
+
+    @property
+    def searchable_text(self) -> str:
+        return " | ".join(
+            (
+                self.title,
+                self.category,
+                self.job_type,
+                self.location,
+                self.source,
+            )
+        )
+
+
+def utc_now() -> str:
+    return datetime.now(timezone.utc).replace(microsecond=0).isoformat()
+
+
+def env_bool(name: str, default: bool = False) -> bool:
+    raw = os.getenv(name)
+    if raw is None:
+        return default
+    return raw.strip().casefold() in {"1", "true", "yes", "on"}
+
+
+def csv_env(name: str, default: Sequence[str] = ()) -> tuple[str, ...]:
+    raw = os.getenv(name)
+    if raw is None or not raw.strip():
+        return tuple(default)
+    return tuple(item.strip() for item in raw.split(",") if item.strip())
+
+
+def normalize_space(value: str) -> str:
+    return " ".join(value.split())
+
+
+def source_name(url: str) -> str:
+    path_code = urllib.parse.urlparse(url).path.rstrip("/").rsplit("/", 1)[-1].upper()
+    return SOURCE_NAMES.get(path_code, path_code or "UM Careers")
+
+
+def detail_url(requisition_id: str) -> str:
+    query = urllib.parse.urlencode({"REQ_ID": requisition_id, "Language": "1"})
+    return f"https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?{query}"
+
+
+def parse_job_cells(cells: Sequence[str], source_url: str) -> Job | None:
+    """Parse the visible text from one UM Careers result row."""
+    if len(cells) < 4:
+        return None
+
+    first_cell = normalize_space(cells[0])
+    match = REQUISITION_PATTERN.search(first_cell)
+    if not match:
+        return None
+
+    title = first_cell[: match.start()].strip(" -")
+    requisition_id = match.group("id")
+    category = normalize_space(match.group("category"))
+
+    return Job(
+        requisition_id=requisition_id,
+        title=title,
+        category=category,
+        job_type=normalize_space(cells[1]),
+        location=normalize_space(cells[2]),
+        posting_date=normalize_space(cells[3]),
+        source=source_name(source_url),
+        source_url=source_url,
+        detail_url=detail_url(requisition_id),
+    )
+
+
+def extract_jobs(page: Page, source_url: str) -> list[Job]:
+    rows = page.locator("table tbody tr[recno]")
+    count = rows.count()
+    jobs: list[Job] = []
+
+    for index in range(count):
+        row = rows.nth(index)
+        cells = row.locator("td")
+        cell_texts = [cells.nth(i).inner_text() for i in range(cells.count())]
+        job = parse_job_cells(cell_texts, source_url)
+        if job:
+            jobs.append(job)
+
+    if not jobs:
+        title = page.title()
+        visible_text = normalize_space(page.locator("body").inner_text())[:500]
+        raise RuntimeError(
+            f"No jobs could be parsed from {source_url}. "
+            f"The site may have changed. Page title: {title!r}; text: {visible_text!r}"
+        )
+
+    return jobs
+
+
+def scrape_source(context, source_url: str, timeout_ms: int) -> list[Job]:
+    last_error: Exception | None = None
+
+    for attempt in range(1, 3):
+        page = context.new_page()
+        try:
+            LOGGER.info("Checking %s (attempt %d/2)", source_url, attempt)
+            page.goto(source_url, wait_until="domcontentloaded", timeout=timeout_ms)
+            page.wait_for_selector(
+                "table tbody tr[recno]",
+                state="attached",
+                timeout=timeout_ms,
+            )
+            return extract_jobs(page, source_url)
+        except (PlaywrightTimeoutError, PlaywrightError, RuntimeError) as exc:
+            last_error = exc
+            LOGGER.warning("Attempt %d failed for %s: %s", attempt, source_url, exc)
+        finally:
+            page.close()
+
+    raise RuntimeError(f"Could not read {source_url} after two attempts: {last_error}")
+
+
+def scrape_jobs(source_urls: Sequence[str], timeout_ms: int = 120_000) -> list[Job]:
+    jobs_by_id: dict[str, Job] = {}
+
+    with sync_playwright() as playwright:
+        launch_options = {
+            "headless": True,
+            "args": ["--disable-dev-shm-usage", "--no-sandbox"],
+        }
+        browser_channel = os.getenv("BROWSER_CHANNEL", "chrome").strip()
+
+        try:
+            browser = playwright.chromium.launch(
+                channel=browser_channel or None,
+                **launch_options,
+            )
+        except PlaywrightError as exc:
+            LOGGER.warning(
+                "Chrome channel %r was unavailable (%s); trying Playwright Chromium.",
+                browser_channel,
+                exc,
+            )
+            browser = playwright.chromium.launch(**launch_options)
+
+        context = browser.new_context(
+            locale="en-CA",
+            timezone_id="America/Winnipeg",
+            viewport={"width": 1440, "height": 1000},
+        )
+
+        try:
+            for source_url in source_urls:
+                for job in scrape_source(context, source_url, timeout_ms):
+                    jobs_by_id[job.requisition_id] = job
+        finally:
+            context.close()
+            browser.close()
+
+    return list(jobs_by_id.values())
+
+
+def keyword_matches(text: str, keyword: str) -> bool:
+    """Match short codes as words while allowing phrases as substrings."""
+    normalized_text = normalize_space(text).casefold()
+    normalized_keyword = normalize_space(keyword).casefold()
+    if not normalized_keyword:
+        return False
+
+    if re.fullmatch(r"[a-z0-9]{1,4}", normalized_keyword):
+        return bool(
+            re.search(
+                rf"(?<![a-z0-9]){re.escape(normalized_keyword)}(?![a-z0-9])",
+                normalized_text,
+                flags=re.IGNORECASE,
+            )
+        )
+
+    return normalized_keyword in normalized_text
+
+
+def job_matches(
+    job: Job,
+    include_keywords: Sequence[str],
+    exclude_keywords: Sequence[str],
+    alert_all: bool,
+) -> bool:
+    text = job.searchable_text
+
+    if any(keyword_matches(text, keyword) for keyword in exclude_keywords):
+        return False
+    if alert_all or not include_keywords:
+        return True
+    return any(keyword_matches(text, keyword) for keyword in include_keywords)
+
+
+def load_state(path: Path) -> dict:
+    if not path.exists():
+        return {"version": 1, "initialized": False, "seen_ids": []}
+
+    try:
+        state = json.loads(path.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError) as exc:
+        raise RuntimeError(f"Could not read state file {path}: {exc}") from exc
+
+    if not isinstance(state.get("seen_ids"), list):
+        raise RuntimeError(f"State file {path} has an invalid seen_ids field.")
+    return state
+
+
+def save_state(path: Path, state: dict) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    serialized = json.dumps(state, indent=2, sort_keys=True) + "\n"
+
+    with tempfile.NamedTemporaryFile(
+        "w",
+        encoding="utf-8",
+        dir=path.parent,
+        prefix=f".{path.name}.",
+        delete=False,
+    ) as temporary:
+        temporary.write(serialized)
+        temporary_path = Path(temporary.name)
+
+    temporary_path.replace(path)
+
+
+def format_text_alert(jobs: Sequence[Job]) -> str:
+    heading = f"{len(jobs)} new University of Manitoba job posting"
+    if len(jobs) != 1:
+        heading += "s"
+
+    blocks = [heading]
+    for job in jobs:
+        blocks.append(
+            "\n".join(
+                (
+                    job.title,
+                    f"Requisition: {job.requisition_id}",
+                    f"Category: {job.category}",
+                    f"Type: {job.job_type}",
+                    f"Location: {job.location}",
+                    f"Posted: {job.posting_date}",
+                    job.detail_url,
+                )
+            )
+        )
+    return "\n\n".join(blocks)
+
+
+def format_html_alert(jobs: Sequence[Job]) -> str:
+    cards: list[str] = []
+    for job in jobs:
+        cards.append(
+            f"""
+            <div style="margin:0 0 18px;padding:16px;border:1px solid #d8dee4;border-radius:8px">
+              <h2 style="margin:0 0 8px;font-size:18px">{html.escape(job.title)}</h2>
+              <p style="margin:4px 0"><strong>Requisition:</strong> {html.escape(job.requisition_id)}</p>
+              <p style="margin:4px 0"><strong>Category:</strong> {html.escape(job.category)}</p>
+              <p style="margin:4px 0"><strong>Type:</strong> {html.escape(job.job_type)}</p>
+              <p style="margin:4px 0"><strong>Location:</strong> {html.escape(job.location)}</p>
+              <p style="margin:4px 0"><strong>Posted:</strong> {html.escape(job.posting_date)}</p>
+              <p style="margin:12px 0 0">
+                <a href="{html.escape(job.detail_url)}"
+                   style="background:#7b2d3e;color:white;padding:9px 13px;text-decoration:none;border-radius:5px">
+                  View posting
+                </a>
+              </p>
+            </div>
+            """
+        )
+
+    plural = "s" if len(jobs) != 1 else ""
+    return (
+        "<html><body style=\"font-family:Arial,sans-serif;color:#1f2328\">"
+        f"<h1>{len(jobs)} new UM job posting{plural}</h1>"
+        + "".join(cards)
+        + "</body></html>"
+    )
+
+
+def send_email(jobs: Sequence[Job]) -> None:
+    host = os.getenv("SMTP_HOST", "").strip()
+    recipient = os.getenv("ALERT_EMAIL_TO", "").strip()
+    username = os.getenv("SMTP_USERNAME", "").strip()
+    password = os.getenv("SMTP_PASSWORD", "")
+    sender = os.getenv("ALERT_EMAIL_FROM", "").strip() or username
+    port = int(os.getenv("SMTP_PORT") or "465")
+
+    missing = [
+        name
+        for name, value in (
+            ("SMTP_HOST", host),
+            ("ALERT_EMAIL_TO", recipient),
+            ("ALERT_EMAIL_FROM or SMTP_USERNAME", sender),
+        )
+        if not value
+    ]
+    if missing:
+        raise RuntimeError(f"Email configuration is incomplete: {', '.join(missing)}")
+    if bool(username) != bool(password):
+        raise RuntimeError("Set both SMTP_USERNAME and SMTP_PASSWORD, or neither.")
+
+    message = EmailMessage()
+    plural = "s" if len(jobs) != 1 else ""
+    message["Subject"] = f"{len(jobs)} new UM job posting{plural}"
+    message["From"] = sender
+    message["To"] = recipient
+    message.set_content(format_text_alert(jobs))
+    message.add_alternative(format_html_alert(jobs), subtype="html")
+
+    tls_context = ssl.create_default_context()
+    if port == 465:
+        with smtplib.SMTP_SSL(host, port, context=tls_context, timeout=30) as server:
+            if username:
+                server.login(username, password)
+            server.send_message(message)
+    else:
+        with smtplib.SMTP(host, port, timeout=30) as server:
+            server.ehlo()
+            server.starttls(context=tls_context)
+            server.ehlo()
+            if username:
+                server.login(username, password)
+            server.send_message(message)
+
+
+def telegram_chunks(message: str, limit: int = 3900) -> Iterable[str]:
+    remaining = message
+    while len(remaining) > limit:
+        split_at = remaining.rfind("\n\n", 0, limit)
+        if split_at < limit // 2:
+            split_at = limit
+        yield remaining[:split_at]
+        remaining = remaining[split_at:].lstrip()
+    if remaining:
+        yield remaining
+
+
+def send_telegram(jobs: Sequence[Job]) -> None:
+    token = os.getenv("TELEGRAM_BOT_TOKEN", "").strip()
+    chat_id = os.getenv("TELEGRAM_CHAT_ID", "").strip()
+    if not token or not chat_id:
+        raise RuntimeError(
+            "Telegram configuration requires TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID."
+        )
+
+    endpoint = f"https://api.telegram.org/bot{token}/sendMessage"
+    for chunk in telegram_chunks(format_text_alert(jobs)):
+        request_data = urllib.parse.urlencode(
+            {
+                "chat_id": chat_id,
+                "text": chunk,
+                "disable_web_page_preview": "true",
+            }
+        ).encode("utf-8")
+        request = urllib.request.Request(endpoint, data=request_data, method="POST")
+        with urllib.request.urlopen(request, timeout=30) as response:
+            if response.status != 200:
+                raise RuntimeError(f"Telegram returned HTTP {response.status}.")
+
+
+def send_notifications(jobs: Sequence[Job]) -> None:
+    channels: list[tuple[str, callable]] = []
+
+    email_requested = any(
+        os.getenv(name, "").strip()
+        for name in ("SMTP_HOST", "ALERT_EMAIL_TO", "SMTP_USERNAME", "SMTP_PASSWORD")
+    )
+    telegram_requested = any(
+        os.getenv(name, "").strip()
+        for name in ("TELEGRAM_BOT_TOKEN", "TELEGRAM_CHAT_ID")
+    )
+
+    if email_requested:
+        channels.append(("email", send_email))
+    if telegram_requested:
+        channels.append(("Telegram", send_telegram))
+    if not channels:
+        raise RuntimeError(
+            "No alert channel is configured. Configure email or Telegram secrets "
+            "before the next matching job appears."
+        )
+
+    successes: list[str] = []
+    failures: list[str] = []
+    for name, sender in channels:
+        try:
+            sender(jobs)
+            successes.append(name)
+        except Exception as exc:  # Preserve another working channel if one fails.
+            failures.append(f"{name}: {exc}")
+
+    if not successes:
+        raise RuntimeError("All notification channels failed: " + "; ".join(failures))
+    if failures:
+        LOGGER.warning(
+            "Alert delivered through %s, but another channel failed: %s",
+            ", ".join(successes),
+            "; ".join(failures),
+        )
+    else:
+        LOGGER.info("Alert delivered through %s.", ", ".join(successes))
+
+
+def sample_job() -> Job:
+    return Job(
+        requisition_id="TEST",
+        title="Test alert — UM Job Monitor is working",
+        category="TEST",
+        job_type="Notification test",
+        location="Winnipeg, Manitoba",
+        posting_date=datetime.now().strftime("%b/%d/%Y"),
+        source="Test",
+        source_url="https://viprecprod.ad.umanitoba.ca/B",
+        detail_url="https://viprecprod.ad.umanitoba.ca/default",
+    )
+
+
+def build_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--state-file",
+        type=Path,
+        default=Path(os.getenv("STATE_FILE", "data/seen_jobs.json")),
+        help="JSON file used to remember previously seen requisition IDs.",
+    )
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Print current matches without sending alerts or changing state.",
+    )
+    parser.add_argument(
+        "--alert-existing",
+        action="store_true",
+        help="On the first run, alert for matching current postings.",
+    )
+    parser.add_argument(
+        "--test-notification",
+        action="store_true",
+        help="Send a test through every configured notification channel and exit.",
+    )
+    return parser
+
+
+def main(argv: Sequence[str] | None = None) -> int:
+    args = build_parser().parse_args(argv)
+
+    if args.test_notification:
+        send_notifications([sample_job()])
+        LOGGER.info("Test notification sent.")
+        return 0
+
+    source_urls = csv_env("UM_JOB_URLS", DEFAULT_SOURCE_URLS)
+    include_keywords = csv_env("INCLUDE_KEYWORDS", DEFAULT_INCLUDE_KEYWORDS)
+    exclude_keywords = csv_env("EXCLUDE_KEYWORDS")
+    alert_all = env_bool("ALERT_ALL")
+    timeout_ms = int(os.getenv("PAGE_TIMEOUT_MS", "120000"))
+
+    jobs = scrape_jobs(source_urls, timeout_ms=timeout_ms)
+    if not jobs:
+        raise RuntimeError("The monitor received no jobs from any configured source.")
+
+    state = load_state(args.state_file)
+    seen_ids = {str(item) for item in state.get("seen_ids", [])}
+    first_run = not state.get("initialized", False)
+
+    if first_run:
+        candidates = jobs if args.alert_existing else []
+    else:
+        candidates = [job for job in jobs if job.requisition_id not in seen_ids]
+
+    matching_jobs = [
+        job
+        for job in candidates
+        if job_matches(job, include_keywords, exclude_keywords, alert_all)
+    ]
+
+    LOGGER.info(
+        "Read %d current jobs; found %d new and %d matching.",
+        len(jobs),
+        len(candidates),
+        len(matching_jobs),
+    )
+    for job in matching_jobs:
+        LOGGER.info("MATCH %s | %s | %s", job.requisition_id, job.title, job.detail_url)
+
+    if args.dry_run:
+        print(json.dumps([asdict(job) for job in matching_jobs], indent=2))
+        return 0
+
+    if matching_jobs:
+        send_notifications(matching_jobs)
+
+    updated_ids = seen_ids | {job.requisition_id for job in jobs}
+    new_state = {
+        "version": 1,
+        "initialized": True,
+        "last_success_utc": utc_now(),
+        "seen_ids": sorted(updated_ids, key=lambda value: (len(value), value)),
+    }
+    save_state(args.state_file, new_state)
+
+    if first_run and not args.alert_existing:
+        LOGGER.info(
+            "Baseline created with %d requisitions. No old-job alerts were sent.",
+            len(updated_ids),
+        )
+    return 0
+
+
+if __name__ == "__main__":
+    logging.basicConfig(
+        level=os.getenv("LOG_LEVEL", "INFO").upper(),
+        format="%(asctime)s | %(levelname)s | %(message)s",
+    )
+    try:
+        raise SystemExit(main())
+    except Exception as error:
+        LOGGER.error("%s", error)
+        raise SystemExit(1)
