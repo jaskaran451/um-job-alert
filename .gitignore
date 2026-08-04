@@ -2,8 +2,8 @@
 __pycache__/
 *.py[cod]
 .env
-.env.*
-!.env.example
+.env
+!.env
 data/*.db
 data/*.sqlite*
 .pytest_cache/
