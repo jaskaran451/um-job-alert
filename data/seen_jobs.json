@@ -1,7 +1,25 @@
 {
   "initialized": true,
-  "last_success_utc": "2026-08-04T20:45:29+00:00",
+  "last_success_utc": "2026-08-04T21:59:50+00:00",
   "seen_jobs": [
+    {
+      "id": "48904",
+      "posting_date": "Aug/04/2026",
+      "title": "TA - CHEM2122",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48904&Language=1"
+    },
+    {
+      "id": "48902",
+      "posting_date": "Aug/04/2026",
+      "title": "Indigenous Data Sovereignty Program Asst - Tech 5 (AESES)",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48902&Language=1"
+    },
+    {
+      "id": "48901",
+      "posting_date": "Aug/04/2026",
+      "title": "MCP Research Lead - Tech 5 (AESES)",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48901&Language=1"
+    },
     {
       "id": "48898",
       "posting_date": "Aug/04/2026",
@@ -61,12 +79,6 @@
       "posting_date": "Aug/04/2026",
       "title": "Teaching Assistant - EDUB 4102",
       "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48864&Language=1"
-    },
-    {
-      "id": "48862",
-      "posting_date": "Aug/04/2026",
-      "title": "Distance and Online Education Instructor",
-      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48862&Language=1"
     },
     {
       "id": "48860",
@@ -153,12 +165,6 @@
       "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48798&Language=1"
     },
     {
-      "id": "48797",
-      "posting_date": "Jul/30/2026",
-      "title": "Caretaker Supervisor - Administrative Assistant 3 (AESES)",
-      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48797&Language=1"
-    },
-    {
       "id": "48782",
       "posting_date": "Jul/30/2026",
       "title": "Multimedia and Graphic Designer - OA5 (AESES)",
@@ -169,12 +175,6 @@
       "posting_date": "Jul/30/2026",
       "title": "Science Co-op Program Assistant - OA5 (AESES)",
       "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48777&Language=1"
-    },
-    {
-      "id": "48718",
-      "posting_date": "Jul/29/2026",
-      "title": "Biochemical Technician - Tech 4 (AESES)",
-      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48718&Language=1"
     },
     {
       "id": "48708",
