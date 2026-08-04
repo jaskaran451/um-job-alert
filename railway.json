@@ -4,7 +4,7 @@
     "builder": "RAILPACK"
   },
   "deploy": {
-    "preDeployCommand": "python verify_database.py",
+    "preDeployCommand": "python verify_database.py && python configure_telegram_webhook.py",
     "startCommand": "gunicorn --bind 0.0.0.0:$PORT --workers 2 --threads 4 --timeout 120 app:app",
     "healthcheckPath": "/healthz",
     "healthcheckTimeout": 120,
