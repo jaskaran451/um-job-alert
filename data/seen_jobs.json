@@ -1,7 +1,31 @@
 {
   "initialized": true,
-  "last_success_utc": "2026-08-04T18:55:37+00:00",
+  "last_success_utc": "2026-08-04T20:45:29+00:00",
   "seen_jobs": [
+    {
+      "id": "48898",
+      "posting_date": "Aug/04/2026",
+      "title": "Project Manager Level 1 - Level 6 (EMAPS)",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48898&Language=1"
+    },
+    {
+      "id": "48897",
+      "posting_date": "Aug/04/2026",
+      "title": "Receptionist - OA3 (AESES)",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48897&Language=1"
+    },
+    {
+      "id": "48896",
+      "posting_date": "Aug/04/2026",
+      "title": "Project Manager Level 2 - Level 7 (EMAPS)",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48896&Language=1"
+    },
+    {
+      "id": "48895",
+      "posting_date": "Aug/04/2026",
+      "title": "Financial Analyst - AA3 (AESES)",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48895&Language=1"
+    },
     {
       "id": "48890",
       "posting_date": "Aug/04/2026",
@@ -17,7 +41,7 @@
     {
       "id": "48886",
       "posting_date": "Aug/04/2026",
-      "title": "Regional Distributed Medical Education Lead - IE Region",
+      "title": "Regional Distributed Medical Education Lead - Interlake Regi",
       "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48886&Language=1"
     },
     {
@@ -99,12 +123,6 @@
       "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48145&Language=1"
     },
     {
-      "id": "46490",
-      "posting_date": "Aug/04/2026",
-      "title": "MCP Research Lead - Tech 5 (AESES)",
-      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=46490&Language=1"
-    },
-    {
       "id": "48849",
       "posting_date": "Jul/31/2026",
       "title": "Biological Technician - Tech 3 (AESES)",
@@ -153,16 +171,10 @@
       "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48777&Language=1"
     },
     {
-      "id": "48731",
+      "id": "48718",
       "posting_date": "Jul/29/2026",
-      "title": "Research Coordinator - Tech 4 (AESES)",
-      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48731&Language=1"
-    },
-    {
-      "id": "48730",
-      "posting_date": "Jul/29/2026",
-      "title": "Research Coordinator - Tech 4 (AESES)",
-      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48730&Language=1"
+      "title": "Biochemical Technician - Tech 4 (AESES)",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48718&Language=1"
     },
     {
       "id": "48708",
@@ -229,18 +241,6 @@
       "posting_date": "May/11/2026",
       "title": "Food Services Cook (UNIFOR)",
       "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=46061&Language=1"
-    },
-    {
-      "id": "44679",
-      "posting_date": "Mar/09/2026",
-      "title": "Caretaker - Nights (UNIFOR)",
-      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=44679&Language=1"
-    },
-    {
-      "id": "31119",
-      "posting_date": "Jan/17/2024",
-      "title": "Renal Nurse - LPN- Nurses in Northern Manitoba (EMAPS)",
-      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=31119&Language=1"
     }
   ],
   "version": 2
