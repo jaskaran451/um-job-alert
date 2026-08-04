@@ -1,27 +1,247 @@
 {
   "initialized": true,
-  "last_success_utc": "2026-08-04T01:08:29+00:00",
-  "seen_ids": [
-    "48718",
-    "48730",
-    "48731",
-    "48777",
-    "48782",
-    "48797",
-    "48798",
-    "48818",
-    "48819",
-    "48820",
-    "48823",
-    "48824",
-    "48832",
-    "48833",
-    "48834",
-    "48835",
-    "48838",
-    "48840",
-    "48846",
-    "48849"
+  "last_success_utc": "2026-08-04T02:03:38+00:00",
+  "seen_jobs": [
+    {
+      "id": "48849",
+      "posting_date": "Jul/31/2026",
+      "title": "Biological Technician - Tech 3 (AESES)",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48849&Language=1"
+    },
+    {
+      "id": "48846",
+      "posting_date": "Jul/31/2026",
+      "title": "Service Desk Analyst - IT2 (AESES)",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48846&Language=1"
+    },
+    {
+      "id": "48840",
+      "posting_date": "Jul/31/2026",
+      "title": "Grader Marker - KPER 2170 (CUPE Students)",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48840&Language=1"
+    },
+    {
+      "id": "48838",
+      "posting_date": "Jul/31/2026",
+      "title": "Plant Growth Technician - Tech 2 (AESES)",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48838&Language=1"
+    },
+    {
+      "id": "48835",
+      "posting_date": "Jul/31/2026",
+      "title": "Grader/Marker - CHEM2510",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48835&Language=1"
+    },
+    {
+      "id": "48834",
+      "posting_date": "Jul/31/2026",
+      "title": "Tutor Chem Help Centre - Regular (Fall 2026)",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48834&Language=1"
+    },
+    {
+      "id": "48833",
+      "posting_date": "Jul/31/2026",
+      "title": "Grader/Marker - CHEM2600",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48833&Language=1"
+    },
+    {
+      "id": "48832",
+      "posting_date": "Jul/31/2026",
+      "title": "TA - CHEM1120",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48832&Language=1"
+    },
+    {
+      "id": "48824",
+      "posting_date": "Jul/31/2026",
+      "title": "TA/Demo/Tutor/Sem. Leader - NURS 2500 - PINE (CUPE Students)",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48824&Language=1"
+    },
+    {
+      "id": "48823",
+      "posting_date": "Jul/31/2026",
+      "title": "TA/Demo/Tutor/Sem. Leader - NURS 2514 - PINE (CUPE Students)",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48823&Language=1"
+    },
+    {
+      "id": "48820",
+      "posting_date": "Jul/31/2026",
+      "title": "TA/Demo/Tutor/Sem. Leader - NURS 2520 A02",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48820&Language=1"
+    },
+    {
+      "id": "48819",
+      "posting_date": "Jul/31/2026",
+      "title": "TA/Demo/Tutor/Sem. Leader - BIOL 1000- PINE (CUPE Students)",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48819&Language=1"
+    },
+    {
+      "id": "48818",
+      "posting_date": "Jul/31/2026",
+      "title": "TA/Demo/Tutor/Sem. Leader - BIOL 1410- PINE (CUPE Students)",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48818&Language=1"
+    },
+    {
+      "id": "48816",
+      "posting_date": "Jul/31/2026",
+      "title": "Project Development Lead",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48816&Language=1"
+    },
+    {
+      "id": "48798",
+      "posting_date": "Jul/30/2026",
+      "title": "Graduate Program Assistant - OA5 (AESES)",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48798&Language=1"
+    },
+    {
+      "id": "48797",
+      "posting_date": "Jul/30/2026",
+      "title": "Caretaker Supervisor - Administrative Assistant 3 (AESES)",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48797&Language=1"
+    },
+    {
+      "id": "48782",
+      "posting_date": "Jul/30/2026",
+      "title": "Multimedia and Graphic Designer - OA5 (AESES)",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48782&Language=1"
+    },
+    {
+      "id": "48777",
+      "posting_date": "Jul/30/2026",
+      "title": "Science Co-op Program Assistant - OA5 (AESES)",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48777&Language=1"
+    },
+    {
+      "id": "48731",
+      "posting_date": "Jul/29/2026",
+      "title": "Research Coordinator - Tech 4 (AESES)",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48731&Language=1"
+    },
+    {
+      "id": "48730",
+      "posting_date": "Jul/29/2026",
+      "title": "Research Coordinator - Tech 4 (AESES)",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48730&Language=1"
+    },
+    {
+      "id": "48718",
+      "posting_date": "Jul/29/2026",
+      "title": "Biochemical Technician - Tech 4 (AESES)",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48718&Language=1"
+    },
+    {
+      "id": "48708",
+      "posting_date": "Jul/28/2026",
+      "title": "Light Equipment Operator - Light Equipment Operator (Unifor)",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48708&Language=1"
+    },
+    {
+      "id": "48695",
+      "posting_date": "Jul/28/2026",
+      "title": "Post Doctoral Fellow",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48695&Language=1"
+    },
+    {
+      "id": "48538",
+      "posting_date": "Jul/27/2026",
+      "title": "Change & Development Specialist - Level 7 (EMAPS)",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48538&Language=1"
+    },
+    {
+      "id": "48495",
+      "posting_date": "Jul/23/2026",
+      "title": "Associate Head, Graduate Programs",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48495&Language=1"
+    },
+    {
+      "id": "48456",
+      "posting_date": "Jul/23/2026",
+      "title": "TA/Demo/Tutor/Sem Leader",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48456&Language=1"
+    },
+    {
+      "id": "48455",
+      "posting_date": "Jul/23/2026",
+      "title": "TA/Demo/Tutor/Sem Leader",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48455&Language=1"
+    },
+    {
+      "id": "48060",
+      "posting_date": "Jul/15/2026",
+      "title": "Instructor I or II",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48060&Language=1"
+    },
+    {
+      "id": "47977",
+      "posting_date": "Jul/14/2026",
+      "title": "Data Analyst - Level 5 (EMAPS)",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=47977&Language=1"
+    },
+    {
+      "id": "47937",
+      "posting_date": "Jul/14/2026",
+      "title": "Grader/Marker",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=47937&Language=1"
+    },
+    {
+      "id": "47830",
+      "posting_date": "Jul/10/2026",
+      "title": "Assistant Professor and CRC Tier 2",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=47830&Language=1"
+    },
+    {
+      "id": "47788",
+      "posting_date": "Jul/10/2026",
+      "title": "Assistant or Associate Professor & CRC Tier 2",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=47788&Language=1"
+    },
+    {
+      "id": "47742",
+      "posting_date": "Jul/09/2026",
+      "title": "Instructor I, Instructor II, Senior Instructor",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=47742&Language=1"
+    },
+    {
+      "id": "47194",
+      "posting_date": "Jun/25/2026",
+      "title": "Section Head (UNIFOR)",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=47194&Language=1"
+    },
+    {
+      "id": "47189",
+      "posting_date": "Jun/25/2026",
+      "title": "Food Services Worker",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=47189&Language=1"
+    },
+    {
+      "id": "45762",
+      "posting_date": "Jun/15/2026",
+      "title": "Caretaker - Nights (UNIFOR)",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=45762&Language=1"
+    },
+    {
+      "id": "46061",
+      "posting_date": "May/11/2026",
+      "title": "Food Services Cook (UNIFOR)",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=46061&Language=1"
+    },
+    {
+      "id": "44679",
+      "posting_date": "Mar/09/2026",
+      "title": "Caretaker - Nights (UNIFOR)",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=44679&Language=1"
+    },
+    {
+      "id": "31119",
+      "posting_date": "Jan/17/2024",
+      "title": "Renal Nurse - LPN- Nurses in Northern Manitoba (EMAPS)",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=31119&Language=1"
+    },
+    {
+      "id": "31117",
+      "posting_date": "Jan/17/2024",
+      "title": "Renal Nurse - RN- Nurses in Northern Manitoba (EMAPS)",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=31117&Language=1"
+    }
   ],
-  "version": 1
+  "version": 2
 }
