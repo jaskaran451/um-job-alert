@@ -8,9 +8,7 @@ on:
         required: false
         default: false
         type: boolean
-
   schedule:
-    # Runs every 30 minutes.
     - cron: "17,47 * * * *"
 
 permissions:
@@ -24,25 +22,22 @@ jobs:
   check-postings:
     runs-on: ubuntu-24.04
     timeout-minutes: 10
-
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-
       - name: Set up Python
         uses: actions/setup-python@v7
         with:
           python-version: "3.12"
           cache: pip
-
-      - name: Install dependency
+      - name: Install dependencies
         run: pip install --disable-pip-version-check -r requirements.txt
-
       - name: Run unit tests
         run: python -m unittest discover -s tests -v
-
+      - name: Preserve previous job history
+        run: cp data/seen_jobs.json /tmp/seen_jobs_before.json
       - name: Run monitor or Telegram test
         env:
           INCLUDE_KEYWORDS: ${{ vars.INCLUDE_KEYWORDS }}
@@ -51,26 +46,27 @@ jobs:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           BROWSER_CHANNEL: chrome
-
         run: |
           if [[ "${{ github.event_name }}" == "workflow_dispatch" && "${{ inputs.test_notification }}" == "true" ]]; then
             python um_job_alert.py --test-notification
           else
             python um_job_alert.py
           fi
-
+      - name: Dispatch new jobs to website subscribers
+        if: ${{ success() && !(github.event_name == 'workflow_dispatch' && inputs.test_notification) }}
+        env:
+          SUBSCRIBER_API_URL: ${{ vars.SUBSCRIBER_API_URL }}
+          SUBSCRIBER_API_KEY: ${{ secrets.SUBSCRIBER_API_KEY }}
+        run: python dispatch_subscribers.py --before /tmp/seen_jobs_before.json --after data/seen_jobs.json
       - name: Save updated job history
         if: ${{ success() && !(github.event_name == 'workflow_dispatch' && inputs.test_notification) }}
-
         run: |
           if git diff --quiet -- data/seen_jobs.json; then
             echo "Posting history is unchanged."
             exit 0
           fi
-
           git config user.name "um-job-alert[bot]"
           git config user.email "um-job-alert[bot]@users.noreply.github.com"
-
           git add data/seen_jobs.json
           git commit -m "Update UM job history [skip ci]"
           git push

@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Get email alerts for new University of Manitoba jobs matching your interests.">
+  <title>UM Job Alerts</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  <script defer src="{{ url_for('static', filename='app.js') }}"></script>
+</head>
+<body>
+<header class="site-header">
+  <a class="brand" href="#top"><span class="brand-mark">♢</span><span>UM Job Alerts</span></a>
+  <nav><a href="#latest">Latest jobs</a><a href="#how">How it works</a><a class="nav-cta" href="#subscribe">Create alert</a></nav>
+</header>
+<main id="top">
+  <section class="hero shell">
+    <div class="hero-copy">
+      <div class="eyebrow"><span></span> Monitoring U of M careers every 30 minutes</div>
+      <h1>Find the right U of M opportunity <em>before you miss it.</em></h1>
+      <p>Choose the roles and keywords you care about. We monitor public postings and email you when a new title matches.</p>
+      <div class="trust"><b>✓ No account needed</b><b>✓ No UM password</b><b>✓ Free alerts</b></div>
+    </div>
+    <div class="signup-card" id="subscribe">
+      <div class="card-head"><small>PERSONALIZED ALERT</small><h2>Create your job alert</h2><p>Submitting the same email later updates your preferences.</p></div>
+      <form id="subscription-form" novalidate>
+        <label for="email">Email address</label>
+        <input id="email" type="email" autocomplete="email" placeholder="you@example.com" required>
+        <p class="error" id="email-error"></p>
+        <fieldset>
+          <legend>What roles interest you?</legend>
+          <div class="roles">
+            <label class="role wide"><input type="checkbox" name="role_type" value="all"><span>✓</span><b>All new postings<small>Every role we detect</small></b></label>
+            <label class="role"><input type="checkbox" name="role_type" value="teaching_assistant"><span>✓</span><b>Teaching Assistant<small>TA, demo and tutor</small></b></label>
+            <label class="role"><input type="checkbox" name="role_type" value="grader_marker"><span>✓</span><b>Grader / Marker<small>Course grading roles</small></b></label>
+            <label class="role"><input type="checkbox" name="role_type" value="instructor_sessionals"><span>✓</span><b>Instructor / Sessional<small>Lecturer and teaching</small></b></label>
+            <label class="role"><input type="checkbox" name="role_type" value="technical_it"><span>✓</span><b>Technical / IT<small>Developer, analyst, tech</small></b></label>
+            <label class="role"><input type="checkbox" name="role_type" value="research"><span>✓</span><b>Research<small>Assistant and associate</small></b></label>
+          </div>
+          <p class="error" id="preferences-error"></p>
+        </fieldset>
+        <label for="keyword-input">Keywords <i>Optional</i></label>
+        <div class="keyword-entry"><input id="keyword-input" type="text" maxlength="40" placeholder="Try COMP, ECE, engineering…"><button id="add-keyword" type="button">Add</button></div>
+        <div class="suggestions"><button type="button" data-keyword="COMP">+ COMP</button><button type="button" data-keyword="ECE">+ ECE</button><button type="button" data-keyword="Engineering">+ Engineering</button><button type="button" data-keyword="Computer Science">+ Computer Science</button></div>
+        <div id="keyword-list" class="tags"></div>
+        <div class="honeypot"><input id="company" type="text" tabindex="-1" autocomplete="off"></div>
+        <label class="consent"><input id="consent" type="checkbox"><span>I agree to receive job-alert emails. I can unsubscribe anytime.</span></label>
+        <p class="error" id="consent-error"></p>
+        <button class="primary" type="submit"><span>Create my alert</span><b>→</b></button>
+        <div id="form-message" class="message" role="status"></div>
+        <p class="privacy">🔒 Your email is used only for these alerts.</p>
+      </form>
+    </div>
+  </section>
+  <section class="stats"><div><strong>30 min</strong><span>Monitoring interval</span></div><div><strong>{{ tracked_job_count }}</strong><span>Latest jobs tracked</span></div><div><strong>5</strong><span>Job boards checked</span></div><div><strong>1-click</strong><span>Unsubscribe</span></div></section>
+  <section class="latest shell" id="latest">
+    <div class="section-head"><div><small>LIVE FROM THE MONITOR</small><h2>Recently detected postings</h2></div><a href="https://viprecprod.ad.umanitoba.ca/default" target="_blank" rel="noopener">Official job board ↗</a></div>
+    <div class="jobs">
+      {% for job in latest_jobs %}<article><div class="meta"><span>New</span><time>{{ job.posting_date }}</time></div><h3>{{ job.title }}</h3><p>Requisition {{ job.id }}</p><a href="{{ job.url }}" target="_blank" rel="noopener">View posting →</a></article>{% else %}<article class="empty"><h3>Waiting for the next update</h3><p>Recent postings will appear automatically.</p></article>{% endfor %}
+    </div>
+  </section>
+  <section class="how" id="how"><div class="shell"><div class="center"><small>SIMPLE BY DESIGN</small><h2>From new posting to your inbox</h2><p>The service monitors only public pages and never asks for University credentials.</p></div><div class="steps"><article><i>01</i><b>◷</b><h3>We check regularly</h3><p>Five public career boards are scanned twice each hour.</p></article><article><i>02</i><b>⌕</b><h3>We match your choices</h3><p>New titles are compared with your selected roles and keywords.</p></article><article><i>03</i><b>✉</b><h3>You receive the link</h3><p>A focused email takes you directly to the official posting.</p></article></div></div></section>
+</main>
+<footer><div class="shell footer"><div><a class="brand" href="#top"><span class="brand-mark">♢</span><span>UM Job Alerts</span></a><p>Helping students and job seekers discover relevant public postings sooner.</p></div><p>Independent project. Not affiliated with, endorsed by, or operated by the University of Manitoba.</p></div></footer>
+</body>
+</html>
