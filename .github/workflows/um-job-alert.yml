@@ -1,0 +1,76 @@
+name: UM Job Alert
+
+on:
+  workflow_dispatch:
+    inputs:
+      test_notification:
+        description: "Send a Telegram test message without checking jobs"
+        required: false
+        default: false
+        type: boolean
+
+  schedule:
+    # Runs every 30 minutes.
+    - cron: "17,47 * * * *"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: um-job-alert
+  cancel-in-progress: false
+
+jobs:
+  check-postings:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependency
+        run: pip install --disable-pip-version-check -r requirements.txt
+
+      - name: Run unit tests
+        run: python -m unittest discover -s tests -v
+
+      - name: Run monitor or Telegram test
+        env:
+          INCLUDE_KEYWORDS: ${{ vars.INCLUDE_KEYWORDS }}
+          EXCLUDE_KEYWORDS: ${{ vars.EXCLUDE_KEYWORDS }}
+          ALERT_ALL: ${{ vars.ALERT_ALL }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          BROWSER_CHANNEL: chrome
+
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" && "${{ inputs.test_notification }}" == "true" ]]; then
+            python um_job_alert.py --test-notification
+          else
+            python um_job_alert.py
+          fi
+
+      - name: Save updated job history
+        if: ${{ success() && !(github.event_name == 'workflow_dispatch' && inputs.test_notification) }}
+
+        run: |
+          if git diff --quiet -- data/seen_jobs.json; then
+            echo "Posting history is unchanged."
+            exit 0
+          fi
+
+          git config user.name "um-job-alert[bot]"
+          git config user.email "um-job-alert[bot]@users.noreply.github.com"
+
+          git add data/seen_jobs.json
+          git commit -m "Update UM job history [skip ci]"
+          git push
