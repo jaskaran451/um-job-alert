@@ -1,0 +1,29 @@
+services:
+  - type: web
+    name: um-job-alert
+    runtime: python
+    buildCommand: pip install --disable-pip-version-check -r requirements.txt
+    startCommand: gunicorn app:app
+    healthCheckPath: /healthz
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: um-job-alert-db
+          property: connectionString
+      - key: APP_SECRET_KEY
+        generateValue: true
+      - key: DISPATCH_API_KEY
+        sync: false
+      - key: SMTP_HOST
+        sync: false
+      - key: SMTP_PORT
+        value: "465"
+      - key: SMTP_USERNAME
+        sync: false
+      - key: SMTP_PASSWORD
+        sync: false
+      - key: ALERT_EMAIL_FROM
+        sync: false
+
+databases:
+  - name: um-job-alert-db
