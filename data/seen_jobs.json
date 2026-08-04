@@ -1,54 +1,36 @@
 {
   "initialized": true,
-  "last_success_utc": "2026-08-04T17:05:22+00:00",
+  "last_success_utc": "2026-08-04T18:55:37+00:00",
   "seen_jobs": [
     {
-      "id": "48877",
+      "id": "48890",
       "posting_date": "Aug/04/2026",
-      "title": "GMGT 1010 A08 SESSIONAL",
-      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48877&Language=1"
+      "title": "Director Office of Community Engagement - Level 7 (EMAPS)",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48890&Language=1"
     },
     {
-      "id": "48874",
+      "id": "48888",
       "posting_date": "Aug/04/2026",
-      "title": "Lecturer/Instructor - EDUB 3100",
-      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48874&Language=1"
+      "title": "Student Lecturer",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48888&Language=1"
     },
     {
-      "id": "48872",
+      "id": "48886",
       "posting_date": "Aug/04/2026",
-      "title": "Lecturer/Instructor - EDUB 3100",
-      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48872&Language=1"
-    },
-    {
-      "id": "48870",
-      "posting_date": "Aug/04/2026",
-      "title": "Teaching Assistant - EDUB 3010",
-      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48870&Language=1"
-    },
-    {
-      "id": "48869",
-      "posting_date": "Aug/04/2026",
-      "title": "Teaching Assistant - EDUB 3502/4138",
-      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48869&Language=1"
-    },
-    {
-      "id": "48868",
-      "posting_date": "Aug/04/2026",
-      "title": "Teaching Assistant - EDUB 3050",
-      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48868&Language=1"
-    },
-    {
-      "id": "48867",
-      "posting_date": "Aug/04/2026",
-      "title": "Teaching Assistant - EDUB 3056",
-      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48867&Language=1"
+      "title": "Regional Distributed Medical Education Lead - IE Region",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48886&Language=1"
     },
     {
       "id": "48866",
       "posting_date": "Aug/04/2026",
       "title": "Teaching Assistant - EDUB 4146",
       "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48866&Language=1"
+    },
+    {
+      "id": "48865",
+      "posting_date": "Aug/04/2026",
+      "title": "GMGT 1010 A04 SESSIONAL",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48865&Language=1"
     },
     {
       "id": "48864",
@@ -85,6 +67,42 @@
       "posting_date": "Aug/04/2026",
       "title": "INVIGILATOR",
       "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48857&Language=1"
+    },
+    {
+      "id": "48154",
+      "posting_date": "Aug/04/2026",
+      "title": "Sessional Instructor, HNSC 1210 A01",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48154&Language=1"
+    },
+    {
+      "id": "48152",
+      "posting_date": "Aug/04/2026",
+      "title": "Sessional Instructor, HNSC 2000",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48152&Language=1"
+    },
+    {
+      "id": "48149",
+      "posting_date": "Aug/04/2026",
+      "title": "Sessional Instructor, HNSC 3320",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48149&Language=1"
+    },
+    {
+      "id": "48147",
+      "posting_date": "Aug/04/2026",
+      "title": "Sessional Instructor, FOOD 1000",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48147&Language=1"
+    },
+    {
+      "id": "48145",
+      "posting_date": "Aug/04/2026",
+      "title": "Sessional Instructor, FOOD 4010",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48145&Language=1"
+    },
+    {
+      "id": "46490",
+      "posting_date": "Aug/04/2026",
+      "title": "MCP Research Lead - Tech 5 (AESES)",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=46490&Language=1"
     },
     {
       "id": "48849",
@@ -147,12 +165,6 @@
       "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48730&Language=1"
     },
     {
-      "id": "48718",
-      "posting_date": "Jul/29/2026",
-      "title": "Biochemical Technician - Tech 4 (AESES)",
-      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48718&Language=1"
-    },
-    {
       "id": "48708",
       "posting_date": "Jul/28/2026",
       "title": "Light Equipment Operator - Light Equipment Operator (Unifor)",
@@ -187,12 +199,6 @@
       "posting_date": "Jul/23/2026",
       "title": "TA/Demo/Tutor/Sem Leader",
       "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48455&Language=1"
-    },
-    {
-      "id": "48060",
-      "posting_date": "Jul/15/2026",
-      "title": "Instructor I or II",
-      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48060&Language=1"
     },
     {
       "id": "47977",
@@ -235,12 +241,6 @@
       "posting_date": "Jan/17/2024",
       "title": "Renal Nurse - LPN- Nurses in Northern Manitoba (EMAPS)",
       "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=31119&Language=1"
-    },
-    {
-      "id": "31117",
-      "posting_date": "Jan/17/2024",
-      "title": "Renal Nurse - RN- Nurses in Northern Manitoba (EMAPS)",
-      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=31117&Language=1"
     }
   ],
   "version": 2
