@@ -3,10 +3,7 @@ import unittest
 from pathlib import Path
 
 from um_job_alert import (
-    Job,
     detail_url,
-    job_matches,
-    keyword_matches,
     load_state,
     parse_job_cells,
     save_state,
@@ -52,34 +49,6 @@ class ParserTests(unittest.TestCase):
 
     def test_detail_url_is_encoded(self):
         self.assertIn("REQ_ID=12345", detail_url("12345"))
-
-
-class FilterTests(unittest.TestCase):
-    def setUp(self):
-        self.job = Job(
-            requisition_id="48765",
-            title="TA/Demo/TUR/Sem. Leaders - COMP 1012",
-            category="STUDENTS",
-            job_type="Part Time - Temporary",
-            location="Manitoba Fort Garry Campus",
-            posting_date="Jul/29/2026",
-            source="Sessional and student academic",
-            source_url="https://viprecprod.ad.umanitoba.ca/B",
-            detail_url=detail_url("48765"),
-        )
-
-    def test_short_code_uses_word_boundaries(self):
-        self.assertFalse(keyword_matches("Manitoba Temporary", "TA"))
-        self.assertTrue(keyword_matches("TA/Demo position", "TA"))
-
-    def test_included_keyword_matches(self):
-        self.assertTrue(job_matches(self.job, ["COMP"], [], False))
-
-    def test_exclusion_wins(self):
-        self.assertFalse(job_matches(self.job, ["COMP"], ["1012"], False))
-
-    def test_alert_all(self):
-        self.assertTrue(job_matches(self.job, [], [], True))
 
 
 class StateTests(unittest.TestCase):

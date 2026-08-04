@@ -4,22 +4,18 @@
 from __future__ import annotations
 
 import argparse
-import html
 import json
 import logging
 import os
 import re
-import smtplib
-import ssl
 import sys
 import tempfile
 import urllib.parse
-import urllib.request
+
 from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
-from email.message import EmailMessage
 from pathlib import Path
-from typing import Iterable, Sequence
+from typing import Sequence
 
 from playwright.sync_api import Error as PlaywrightError
 from playwright.sync_api import Page, TimeoutError as PlaywrightTimeoutError
@@ -49,17 +45,7 @@ SOURCE_NAMES = {
 
 # These defaults focus on opportunities most likely to be useful to a
 # Computer Engineering student. Set ALERT_ALL=true to receive every posting.
-DEFAULT_INCLUDE_KEYWORDS = (
-    "teaching assistant",
-    "TA/Demo",
-    "grader/marker",
-    "lab demonstrator",
-    "tutor",
-    "COMP",
-    "ECE",
-    "computer science",
-    "engineering",
-)
+
 
 REQUISITION_PATTERN = re.compile(
     r"Requisition\s+No:\s*(?P<id>\d+)\s*-\s*Category:\s*(?P<category>.+)",
@@ -94,13 +80,6 @@ class Job:
 
 def utc_now() -> str:
     return datetime.now(timezone.utc).replace(microsecond=0).isoformat()
-
-
-def env_bool(name: str, default: bool = False) -> bool:
-    raw = os.getenv(name)
-    if raw is None:
-        return default
-    return raw.strip().casefold() in {"1", "true", "yes", "on"}
 
 
 def csv_env(name: str, default: Sequence[str] = ()) -> tuple[str, ...]:
@@ -353,41 +332,6 @@ def scrape_jobs(
     return sorted_jobs[:LATEST_JOBS_LIMIT]
 
 
-
-
-def keyword_matches(text: str, keyword: str) -> bool:
-    """Match short codes as words while allowing phrases as substrings."""
-    normalized_text = normalize_space(text).casefold()
-    normalized_keyword = normalize_space(keyword).casefold()
-    if not normalized_keyword:
-        return False
-
-    if re.fullmatch(r"[a-z0-9]{1,4}", normalized_keyword):
-        return bool(
-            re.search(
-                rf"(?<![a-z0-9]){re.escape(normalized_keyword)}(?![a-z0-9])",
-                normalized_text,
-                flags=re.IGNORECASE,
-            )
-        )
-
-    return normalized_keyword in normalized_text
-
-
-def job_matches(
-    job: Job,
-    include_keywords: Sequence[str],
-    exclude_keywords: Sequence[str],
-    alert_all: bool,
-) -> bool:
-    text = job.searchable_text
-
-    if any(keyword_matches(text, keyword) for keyword in exclude_keywords):
-        return False
-    if alert_all or not include_keywords:
-        return True
-    return any(keyword_matches(text, keyword) for keyword in include_keywords)
-
 def load_state(path: Path) -> dict:
     if not path.exists():
         return {
@@ -442,198 +386,6 @@ def save_state(path: Path, state: dict) -> None:
     temporary_path.replace(path)
 
 
-def format_text_alert(jobs: Sequence[Job]) -> str:
-    heading = f"{len(jobs)} new University of Manitoba job posting"
-    if len(jobs) != 1:
-        heading += "s"
-
-    blocks = [heading]
-    for job in jobs:
-        blocks.append(
-            "\n".join(
-                (
-                    job.title,
-                    f"Requisition: {job.requisition_id}",
-                    f"Category: {job.category}",
-                    f"Type: {job.job_type}",
-                    f"Location: {job.location}",
-                    f"Posted: {job.posting_date}",
-                    job.detail_url,
-                )
-            )
-        )
-    return "\n\n".join(blocks)
-
-
-def format_html_alert(jobs: Sequence[Job]) -> str:
-    cards: list[str] = []
-    for job in jobs:
-        cards.append(
-            f"""
-            <div style="margin:0 0 18px;padding:16px;border:1px solid #d8dee4;border-radius:8px">
-              <h2 style="margin:0 0 8px;font-size:18px">{html.escape(job.title)}</h2>
-              <p style="margin:4px 0"><strong>Requisition:</strong> {html.escape(job.requisition_id)}</p>
-              <p style="margin:4px 0"><strong>Category:</strong> {html.escape(job.category)}</p>
-              <p style="margin:4px 0"><strong>Type:</strong> {html.escape(job.job_type)}</p>
-              <p style="margin:4px 0"><strong>Location:</strong> {html.escape(job.location)}</p>
-              <p style="margin:4px 0"><strong>Posted:</strong> {html.escape(job.posting_date)}</p>
-              <p style="margin:12px 0 0">
-                <a href="{html.escape(job.detail_url)}"
-                   style="background:#7b2d3e;color:white;padding:9px 13px;text-decoration:none;border-radius:5px">
-                  View posting
-                </a>
-              </p>
-            </div>
-            """
-        )
-
-    plural = "s" if len(jobs) != 1 else ""
-    return (
-        "<html><body style=\"font-family:Arial,sans-serif;color:#1f2328\">"
-        f"<h1>{len(jobs)} new UM job posting{plural}</h1>"
-        + "".join(cards)
-        + "</body></html>"
-    )
-
-
-def send_email(jobs: Sequence[Job]) -> None:
-    host = os.getenv("SMTP_HOST", "").strip()
-    recipient = os.getenv("ALERT_EMAIL_TO", "").strip()
-    username = os.getenv("SMTP_USERNAME", "").strip()
-    password = os.getenv("SMTP_PASSWORD", "")
-    sender = os.getenv("ALERT_EMAIL_FROM", "").strip() or username
-    port = int(os.getenv("SMTP_PORT") or "465")
-
-    missing = [
-        name
-        for name, value in (
-            ("SMTP_HOST", host),
-            ("ALERT_EMAIL_TO", recipient),
-            ("ALERT_EMAIL_FROM or SMTP_USERNAME", sender),
-        )
-        if not value
-    ]
-    if missing:
-        raise RuntimeError(f"Email configuration is incomplete: {', '.join(missing)}")
-    if bool(username) != bool(password):
-        raise RuntimeError("Set both SMTP_USERNAME and SMTP_PASSWORD, or neither.")
-
-    message = EmailMessage()
-    plural = "s" if len(jobs) != 1 else ""
-    message["Subject"] = f"{len(jobs)} new UM job posting{plural}"
-    message["From"] = sender
-    message["To"] = recipient
-    message.set_content(format_text_alert(jobs))
-    message.add_alternative(format_html_alert(jobs), subtype="html")
-
-    tls_context = ssl.create_default_context()
-    if port == 465:
-        with smtplib.SMTP_SSL(host, port, context=tls_context, timeout=30) as server:
-            if username:
-                server.login(username, password)
-            server.send_message(message)
-    else:
-        with smtplib.SMTP(host, port, timeout=30) as server:
-            server.ehlo()
-            server.starttls(context=tls_context)
-            server.ehlo()
-            if username:
-                server.login(username, password)
-            server.send_message(message)
-
-
-def telegram_chunks(message: str, limit: int = 3900) -> Iterable[str]:
-    remaining = message
-    while len(remaining) > limit:
-        split_at = remaining.rfind("\n\n", 0, limit)
-        if split_at < limit // 2:
-            split_at = limit
-        yield remaining[:split_at]
-        remaining = remaining[split_at:].lstrip()
-    if remaining:
-        yield remaining
-
-
-def send_telegram(jobs: Sequence[Job]) -> None:
-    token = os.getenv("TELEGRAM_BOT_TOKEN", "").strip()
-    chat_id = os.getenv("TELEGRAM_CHAT_ID", "").strip()
-    if not token or not chat_id:
-        raise RuntimeError(
-            "Telegram configuration requires TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID."
-        )
-
-    endpoint = f"https://api.telegram.org/bot{token}/sendMessage"
-    for chunk in telegram_chunks(format_text_alert(jobs)):
-        request_data = urllib.parse.urlencode(
-            {
-                "chat_id": chat_id,
-                "text": chunk,
-                "disable_web_page_preview": "true",
-            }
-        ).encode("utf-8")
-        request = urllib.request.Request(endpoint, data=request_data, method="POST")
-        with urllib.request.urlopen(request, timeout=30) as response:
-            if response.status != 200:
-                raise RuntimeError(f"Telegram returned HTTP {response.status}.")
-
-
-def send_notifications(jobs: Sequence[Job]) -> None:
-    channels: list[tuple[str, callable]] = []
-
-    email_requested = any(
-        os.getenv(name, "").strip()
-        for name in ("SMTP_HOST", "ALERT_EMAIL_TO", "SMTP_USERNAME", "SMTP_PASSWORD")
-    )
-    telegram_requested = any(
-        os.getenv(name, "").strip()
-        for name in ("TELEGRAM_BOT_TOKEN", "TELEGRAM_CHAT_ID")
-    )
-
-    if email_requested:
-        channels.append(("email", send_email))
-    if telegram_requested:
-        channels.append(("Telegram", send_telegram))
-    if not channels:
-        raise RuntimeError(
-            "No alert channel is configured. Configure email or Telegram secrets "
-            "before the next matching job appears."
-        )
-
-    successes: list[str] = []
-    failures: list[str] = []
-    for name, sender in channels:
-        try:
-            sender(jobs)
-            successes.append(name)
-        except Exception as exc:  # Preserve another working channel if one fails.
-            failures.append(f"{name}: {exc}")
-
-    if not successes:
-        raise RuntimeError("All notification channels failed: " + "; ".join(failures))
-    if failures:
-        LOGGER.warning(
-            "Alert delivered through %s, but another channel failed: %s",
-            ", ".join(successes),
-            "; ".join(failures),
-        )
-    else:
-        LOGGER.info("Alert delivered through %s.", ", ".join(successes))
-
-
-def sample_job() -> Job:
-    return Job(
-        requisition_id="TEST",
-        title="Test alert — UM Job Monitor is working",
-        category="TEST",
-        job_type="Notification test",
-        location="Winnipeg, Manitoba",
-        posting_date=datetime.now().strftime("%b/%d/%Y"),
-        source="Test",
-        source_url="https://viprecprod.ad.umanitoba.ca/B",
-        detail_url="https://viprecprod.ad.umanitoba.ca/default",
-    )
-
-
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
@@ -647,25 +399,10 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Print current matches without sending alerts or changing state.",
     )
-    parser.add_argument(
-        "--alert-existing",
-        action="store_true",
-        help="On the first run, alert for matching current postings.",
-    )
-    parser.add_argument(
-        "--test-notification",
-        action="store_true",
-        help="Send a test through every configured notification channel and exit.",
-    )
     return parser
 
 def main(argv: Sequence[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
-
-    if args.test_notification:
-        send_notifications([sample_job()])
-        LOGGER.info("Test notification sent.")
-        return 0
 
     source_urls = csv_env(
         "UM_JOB_URLS",
@@ -740,9 +477,6 @@ def main(argv: Sequence[str] | None = None) -> int:
             )
         )
         return 0
-
-    if new_jobs:
-        send_notifications(new_jobs)
 
     new_state = {
         "version": 2,
