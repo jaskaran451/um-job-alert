@@ -1,7 +1,91 @@
 {
   "initialized": true,
-  "last_success_utc": "2026-08-04T12:30:21+00:00",
+  "last_success_utc": "2026-08-04T15:11:37+00:00",
   "seen_jobs": [
+    {
+      "id": "48877",
+      "posting_date": "Aug/04/2026",
+      "title": "GMGT 1010 A08 SESSIONAL",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48877&Language=1"
+    },
+    {
+      "id": "48874",
+      "posting_date": "Aug/04/2026",
+      "title": "Lecturer/Instructor - EDUB 3100",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48874&Language=1"
+    },
+    {
+      "id": "48872",
+      "posting_date": "Aug/04/2026",
+      "title": "Lecturer/Instructor - EDUB 3100",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48872&Language=1"
+    },
+    {
+      "id": "48870",
+      "posting_date": "Aug/04/2026",
+      "title": "Teaching Assistant - EDUB 3010",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48870&Language=1"
+    },
+    {
+      "id": "48869",
+      "posting_date": "Aug/04/2026",
+      "title": "Teaching Assistant - EDUB 3502/4138",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48869&Language=1"
+    },
+    {
+      "id": "48868",
+      "posting_date": "Aug/04/2026",
+      "title": "Teaching Assistant - EDUB 3050",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48868&Language=1"
+    },
+    {
+      "id": "48867",
+      "posting_date": "Aug/04/2026",
+      "title": "Teaching Assistant - EDUB 3056",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48867&Language=1"
+    },
+    {
+      "id": "48866",
+      "posting_date": "Aug/04/2026",
+      "title": "Teaching Assistant - EDUB 4146",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48866&Language=1"
+    },
+    {
+      "id": "48864",
+      "posting_date": "Aug/04/2026",
+      "title": "Teaching Assistant - EDUB 4102",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48864&Language=1"
+    },
+    {
+      "id": "48862",
+      "posting_date": "Aug/04/2026",
+      "title": "Distance and Online Education Instructor",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48862&Language=1"
+    },
+    {
+      "id": "48860",
+      "posting_date": "Aug/04/2026",
+      "title": "Regional Distributed Medical Education Lead- Prairie Mtn Reg",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48860&Language=1"
+    },
+    {
+      "id": "48859",
+      "posting_date": "Aug/04/2026",
+      "title": "Regional Distributed Medical Education Lead - Wpg Region",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48859&Language=1"
+    },
+    {
+      "id": "48858",
+      "posting_date": "Aug/04/2026",
+      "title": "Regional Distributed Medical Education Lead- Southern Region",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48858&Language=1"
+    },
+    {
+      "id": "48857",
+      "posting_date": "Aug/04/2026",
+      "title": "INVIGILATOR",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48857&Language=1"
+    },
     {
       "id": "48849",
       "posting_date": "Jul/31/2026",
@@ -15,70 +99,10 @@
       "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48846&Language=1"
     },
     {
-      "id": "48840",
-      "posting_date": "Jul/31/2026",
-      "title": "Grader Marker - KPER 2170 (CUPE Students)",
-      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48840&Language=1"
-    },
-    {
       "id": "48838",
       "posting_date": "Jul/31/2026",
       "title": "Plant Growth Technician - Tech 2 (AESES)",
       "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48838&Language=1"
-    },
-    {
-      "id": "48835",
-      "posting_date": "Jul/31/2026",
-      "title": "Grader/Marker - CHEM2510",
-      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48835&Language=1"
-    },
-    {
-      "id": "48834",
-      "posting_date": "Jul/31/2026",
-      "title": "Tutor Chem Help Centre - Regular (Fall 2026)",
-      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48834&Language=1"
-    },
-    {
-      "id": "48833",
-      "posting_date": "Jul/31/2026",
-      "title": "Grader/Marker - CHEM2600",
-      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48833&Language=1"
-    },
-    {
-      "id": "48832",
-      "posting_date": "Jul/31/2026",
-      "title": "TA - CHEM1120",
-      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48832&Language=1"
-    },
-    {
-      "id": "48824",
-      "posting_date": "Jul/31/2026",
-      "title": "TA/Demo/Tutor/Sem. Leader - NURS 2500 - PINE (CUPE Students)",
-      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48824&Language=1"
-    },
-    {
-      "id": "48823",
-      "posting_date": "Jul/31/2026",
-      "title": "TA/Demo/Tutor/Sem. Leader - NURS 2514 - PINE (CUPE Students)",
-      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48823&Language=1"
-    },
-    {
-      "id": "48820",
-      "posting_date": "Jul/31/2026",
-      "title": "TA/Demo/Tutor/Sem. Leader - NURS 2520 A02",
-      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48820&Language=1"
-    },
-    {
-      "id": "48819",
-      "posting_date": "Jul/31/2026",
-      "title": "TA/Demo/Tutor/Sem. Leader - BIOL 1000- PINE (CUPE Students)",
-      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48819&Language=1"
-    },
-    {
-      "id": "48818",
-      "posting_date": "Jul/31/2026",
-      "title": "TA/Demo/Tutor/Sem. Leader - BIOL 1410- PINE (CUPE Students)",
-      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48818&Language=1"
     },
     {
       "id": "48816",
@@ -175,30 +199,6 @@
       "posting_date": "Jul/14/2026",
       "title": "Data Analyst - Level 5 (EMAPS)",
       "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=47977&Language=1"
-    },
-    {
-      "id": "47937",
-      "posting_date": "Jul/14/2026",
-      "title": "Grader/Marker",
-      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=47937&Language=1"
-    },
-    {
-      "id": "47830",
-      "posting_date": "Jul/10/2026",
-      "title": "Assistant Professor and CRC Tier 2",
-      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=47830&Language=1"
-    },
-    {
-      "id": "47788",
-      "posting_date": "Jul/10/2026",
-      "title": "Assistant or Associate Professor & CRC Tier 2",
-      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=47788&Language=1"
-    },
-    {
-      "id": "47742",
-      "posting_date": "Jul/09/2026",
-      "title": "Instructor I, Instructor II, Senior Instructor",
-      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=47742&Language=1"
     },
     {
       "id": "47194",
