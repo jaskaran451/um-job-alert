@@ -20,23 +20,35 @@ def main() -> int:
         )
         return 1
 
-    # Importing app initializes SQLAlchemy and creates the MVP schema when it
-    # does not exist yet.
-    from app import Subscription, app
+    from app import Delivery, Subscription, TelegramConnection, app
 
     engine = app.extensions["database_engine"]
 
     with engine.connect() as connection:
         connection.execute(text("SELECT 1"))
 
-    tables = inspect(engine).get_table_names()
-    if Subscription.__tablename__ not in tables:
-        print("The subscriptions table was not created.", file=sys.stderr)
+    tables = set(inspect(engine).get_table_names())
+    required_tables = {
+        Subscription.__tablename__,
+        TelegramConnection.__tablename__,
+        Delivery.__tablename__,
+    }
+    missing_tables = sorted(required_tables - tables)
+    if missing_tables:
+        print(
+            "Required tables were not created: " + ", ".join(missing_tables),
+            file=sys.stderr,
+        )
         return 1
 
     with Session(engine) as session:
         subscriber_count = session.scalar(
             select(func.count()).select_from(Subscription)
+        )
+        telegram_count = session.scalar(
+            select(func.count())
+            .select_from(TelegramConnection)
+            .where(TelegramConnection.enabled.is_(True))
         )
 
     print(
@@ -44,8 +56,9 @@ def main() -> int:
             {
                 "status": "ok",
                 "database": engine.url.get_backend_name(),
-                "subscriptions_table": True,
+                "tables": sorted(required_tables),
                 "subscriber_count": int(subscriber_count or 0),
+                "telegram_connections": int(telegram_count or 0),
             },
             sort_keys=True,
         )

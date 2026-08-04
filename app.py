@@ -1,88 +1,42 @@
 from __future__ import annotations
 
-import hashlib
 import hmac
-import html
 import json
 import os
 import re
-import smtplib
-import ssl
-from datetime import datetime, timezone
-from email.message import EmailMessage
 from pathlib import Path
-from typing import Any, Iterable
+from typing import Any
 
 from flask import Flask, jsonify, render_template, request
 from itsdangerous import BadSignature, URLSafeSerializer
-from sqlalchemy import Boolean, DateTime, Integer, String, Text, create_engine, select
-from sqlalchemy.orm import DeclarativeBase, Mapped, Session, mapped_column
+from sqlalchemy import create_engine, select, text
+from sqlalchemy.orm import Session
+
+from delivery_service import dispatch_to_subscribers, smtp_is_configured
+from models import (
+    Base,
+    Delivery,
+    Subscription,
+    TelegramConnection,
+    normalize_database_url,
+    utc_now,
+)
+from telegram_service import (
+    TelegramAPIError,
+    issue_telegram_connect_link,
+    process_telegram_update,
+    telegram_linking_is_configured,
+    telegram_sending_is_configured,
+    validate_webhook_secret,
+)
 
 
 BASE_DIR = Path(__file__).resolve().parent
 EMAIL_PATTERN = re.compile(r"^[^\s@]+@[^\s@]+\.[^\s@]+$")
 ALLOWED_ROLE_TYPES = {
-    "all",
-    "teaching_assistant",
-    "grader_marker",
-    "instructor_sessionals",
-    "technical_it",
-    "research",
+    "all", "teaching_assistant", "grader_marker",
+    "instructor_sessionals", "technical_it", "research",
 }
-ROLE_KEYWORDS = {
-    "teaching_assistant": ("teaching assistant", "ta/demo", "lab demonstrator", "tutor"),
-    "grader_marker": ("grader", "marker"),
-    "instructor_sessionals": ("instructor", "lecturer", "sessional"),
-    "technical_it": (
-        "technician", "technical", "analyst", "developer", "programmer",
-        "engineer", "service desk", "information technology", "computer",
-    ),
-    "research": ("research assistant", "research associate", "research"),
-}
-
-
-def utc_now() -> datetime:
-    return datetime.now(timezone.utc)
-
-
-def normalize_database_url(value: str) -> str:
-    if value.startswith("postgres://"):
-        return value.replace("postgres://", "postgresql+psycopg://", 1)
-    if value.startswith("postgresql://"):
-        return value.replace("postgresql://", "postgresql+psycopg://", 1)
-    return value
-
-
-class Base(DeclarativeBase):
-    pass
-
-
-class Subscription(Base):
-    __tablename__ = "subscriptions"
-
-    id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    email: Mapped[str] = mapped_column(String(254), unique=True, index=True)
-    role_types_json: Mapped[str] = mapped_column(Text, default="[]")
-    keywords_json: Mapped[str] = mapped_column(Text, default="[]")
-    active: Mapped[bool] = mapped_column(Boolean, default=True, index=True)
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now)
-    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now, onupdate=utc_now)
-
-    @property
-    def role_types(self) -> list[str]:
-        return safe_json_list(self.role_types_json)
-
-    @property
-    def keywords(self) -> list[str]:
-        return safe_json_list(self.keywords_json)
-
-
-def safe_json_list(value: str) -> list[str]:
-    try:
-        parsed = json.loads(value)
-    except (TypeError, json.JSONDecodeError):
-        return []
-    return [str(item) for item in parsed] if isinstance(parsed, list) else []
 
 
 def create_app(test_config: dict[str, Any] | None = None) -> Flask:
@@ -94,6 +48,10 @@ def create_app(test_config: dict[str, Any] | None = None) -> Flask:
         ),
         DISPATCH_API_KEY=os.getenv("DISPATCH_API_KEY", ""),
         BASE_URL=os.getenv("BASE_URL", "").rstrip("/"),
+        TELEGRAM_BOT_TOKEN=os.getenv("TELEGRAM_BOT_TOKEN", "").strip(),
+        TELEGRAM_BOT_USERNAME=os.getenv("TELEGRAM_BOT_USERNAME", "").strip().lstrip("@"),
+        TELEGRAM_WEBHOOK_SECRET=os.getenv("TELEGRAM_WEBHOOK_SECRET", "").strip(),
+        TELEGRAM_CONNECT_TTL_MINUTES=int(os.getenv("TELEGRAM_CONNECT_TTL_MINUTES", "30")),
     )
     if test_config:
         app.config.update(test_config)
@@ -102,7 +60,9 @@ def create_app(test_config: dict[str, Any] | None = None) -> Flask:
     if database_url.startswith("sqlite:///"):
         Path(database_url.removeprefix("sqlite:///")).parent.mkdir(parents=True, exist_ok=True)
     connect_args = {"check_same_thread": False} if database_url.startswith("sqlite") else {}
-    engine = create_engine(database_url, pool_pre_ping=True, connect_args=connect_args)
+    engine = create_engine(
+        database_url, pool_pre_ping=True, pool_recycle=300, connect_args=connect_args
+    )
     Base.metadata.create_all(engine)
     app.extensions["database_engine"] = engine
 
@@ -110,13 +70,22 @@ def create_app(test_config: dict[str, Any] | None = None) -> Flask:
     def index():
         latest_jobs, last_updated = load_latest_jobs()
         return render_template(
-            "index.html", latest_jobs=latest_jobs[:6],
-            tracked_job_count=len(latest_jobs), last_updated=last_updated,
+            "index.html",
+            latest_jobs=latest_jobs[:6],
+            tracked_job_count=len(latest_jobs),
+            last_updated=last_updated,
+            telegram_available=telegram_linking_is_configured(app),
         )
 
     @app.get("/healthz")
     def healthcheck():
-        return jsonify(status="ok")
+        try:
+            with engine.connect() as connection:
+                connection.execute(text("SELECT 1"))
+        except Exception:
+            app.logger.exception("Database health check failed")
+            return jsonify(status="error", database="unavailable"), 503
+        return jsonify(status="ok", database=engine.url.get_backend_name())
 
     @app.post("/api/subscriptions")
     def create_subscription():
@@ -127,30 +96,48 @@ def create_app(test_config: dict[str, Any] | None = None) -> Flask:
         email = str(payload.get("email", "")).strip().casefold()
         role_types = sanitize_role_types(payload.get("role_types"))
         keywords = sanitize_keywords(payload.get("keywords"))
-        consent = payload.get("consent") is True
         errors: dict[str, str] = {}
         if not EMAIL_PATTERN.fullmatch(email) or len(email) > 254:
             errors["email"] = "Enter a valid email address."
         if not role_types and not keywords:
             errors["preferences"] = "Choose at least one role type or keyword."
-        if not consent:
+        if payload.get("consent") is not True:
             errors["consent"] = "Consent is required to send job alerts."
         if errors:
             return jsonify(message="Please review the highlighted fields.", errors=errors), 400
 
         with Session(engine) as session:
-            subscription = session.scalar(select(Subscription).where(Subscription.email == email))
+            subscription = session.scalar(
+                select(Subscription).where(Subscription.email == email)
+            )
             if subscription is None:
                 subscription = Subscription(email=email)
                 session.add(subscription)
+                session.flush()
             subscription.role_types_json = json.dumps(role_types)
             subscription.keywords_json = json.dumps(keywords)
             subscription.active = True
             subscription.updated_at = utc_now()
+            subscription_id = subscription.id
             session.commit()
 
-        return jsonify(message="Your alert preferences are saved.", email=email,
-                       role_types=role_types, keywords=keywords), 201
+        connect_url = None
+        connected = False
+        if telegram_linking_is_configured(app):
+            connect_url, connected = issue_telegram_connect_link(
+                app, engine, subscription_id
+            )
+
+        return jsonify(
+            message="Your alert preferences are saved.",
+            email=email,
+            role_types=role_types,
+            keywords=keywords,
+            telegram_available=bool(connect_url),
+            telegram_connected=connected,
+            telegram_connect_url=connect_url,
+            telegram_connect_expires_minutes=app.config["TELEGRAM_CONNECT_TTL_MINUTES"],
+        ), 201
 
     @app.post("/api/internal/dispatch")
     def dispatch_jobs():
@@ -159,32 +146,35 @@ def create_app(test_config: dict[str, Any] | None = None) -> Flask:
         if not configured_key or not hmac.compare_digest(configured_key, supplied_key):
             return jsonify(message="Unauthorized."), 401
 
-        payload = request.get_json(silent=True) or {}
-        jobs = sanitize_jobs(payload.get("jobs"))
+        jobs = sanitize_jobs((request.get_json(silent=True) or {}).get("jobs"))
         if not jobs:
             return jsonify(message="No valid jobs supplied."), 400
-        if not smtp_is_configured():
-            return jsonify(message="Email delivery is not configured."), 503
 
-        attempted = delivered = 0
-        failed: list[str] = []
-        with Session(engine) as session:
-            subscriptions = list(session.scalars(select(Subscription).where(Subscription.active.is_(True))))
+        email_available = smtp_is_configured()
+        telegram_available = telegram_sending_is_configured(app)
+        if not email_available and not telegram_available:
+            return jsonify(message="Neither email nor Telegram delivery is configured."), 503
 
-        for subscription in subscriptions:
-            matching_jobs = [job for job in jobs if subscription_matches(subscription, job)]
-            if not matching_jobs:
-                continue
-            attempted += 1
-            try:
-                send_job_email(app, subscription, matching_jobs)
-                delivered += 1
-            except Exception as exc:
-                app.logger.exception("Could not deliver alert to %s", subscription.email)
-                failed.append(f"{mask_email(subscription.email)}: {exc}")
+        result = dispatch_to_subscribers(
+            app, engine, jobs,
+            email_available=email_available,
+            telegram_available=telegram_available,
+        )
+        return jsonify(**result), 200 if not result["failed"] else 207
 
-        return jsonify(received_jobs=len(jobs), matching_subscribers=attempted,
-                       delivered=delivered, failed=failed), 200 if not failed else 207
+    @app.post("/api/telegram/webhook")
+    def telegram_webhook():
+        supplied_secret = request.headers.get("X-Telegram-Bot-Api-Secret-Token", "")
+        if not validate_webhook_secret(app, supplied_secret):
+            return jsonify(ok=False), 401
+        try:
+            process_telegram_update(app, engine, request.get_json(silent=True) or {})
+        except TelegramAPIError:
+            app.logger.exception("Could not reply to Telegram update")
+        except Exception:
+            app.logger.exception("Could not process Telegram update")
+            return jsonify(ok=False), 500
+        return jsonify(ok=True)
 
     @app.get("/unsubscribe/<token>")
     def unsubscribe(token: str):
@@ -194,10 +184,20 @@ def create_app(test_config: dict[str, Any] | None = None) -> Flask:
         except BadSignature:
             return render_template("unsubscribe.html", success=False), 400
         with Session(engine) as session:
-            subscription = session.scalar(select(Subscription).where(Subscription.email == str(email).casefold()))
+            subscription = session.scalar(
+                select(Subscription).where(Subscription.email == str(email).casefold())
+            )
             if subscription:
                 subscription.active = False
                 subscription.updated_at = utc_now()
+                telegram = session.scalar(
+                    select(TelegramConnection).where(
+                        TelegramConnection.subscription_id == subscription.id
+                    )
+                )
+                if telegram:
+                    telegram.enabled = False
+                    telegram.updated_at = utc_now()
                 session.commit()
         return render_template("unsubscribe.html", success=True)
 
@@ -207,124 +207,69 @@ def create_app(test_config: dict[str, Any] | None = None) -> Flask:
 def sanitize_role_types(value: Any) -> list[str]:
     if not isinstance(value, list):
         return []
-    unique: list[str] = []
+    result: list[str] = []
     for item in value:
-        role_type = str(item).strip()
-        if role_type in ALLOWED_ROLE_TYPES and role_type not in unique:
-            unique.append(role_type)
-    return unique[:6]
+        role = str(item).strip()
+        if role in ALLOWED_ROLE_TYPES and role not in result:
+            result.append(role)
+    return result[:6]
 
 
 def sanitize_keywords(value: Any) -> list[str]:
     if not isinstance(value, list):
         return []
-    unique: list[str] = []
+    result: list[str] = []
     for item in value:
         keyword = " ".join(str(item).split()).strip(" ,")
-        if 2 <= len(keyword) <= 40 and keyword.casefold() not in {x.casefold() for x in unique}:
-            unique.append(keyword)
-    return unique[:8]
+        if 2 <= len(keyword) <= 40 and keyword.casefold() not in {
+            existing.casefold() for existing in result
+        }:
+            result.append(keyword)
+    return result[:8]
 
 
 def sanitize_jobs(value: Any) -> list[dict[str, str]]:
     if not isinstance(value, list):
         return []
     jobs: list[dict[str, str]] = []
+    seen: set[tuple[str, str]] = set()
     for item in value[:50]:
         if not isinstance(item, dict):
             continue
         title = " ".join(str(item.get("title", "")).split())[:200]
         url = str(item.get("url") or item.get("detail_url") or "").strip()[:500]
+        job_id = str(item.get("id") or item.get("requisition_id") or "")[:30]
         if not title or not url.startswith("https://viprecprod.ad.umanitoba.ca/"):
             continue
-        jobs.append({"id": str(item.get("id") or item.get("requisition_id") or "")[:30],
-                     "title": title, "posting_date": str(item.get("posting_date", ""))[:40], "url": url})
+        key = (job_id, url)
+        if key in seen:
+            continue
+        seen.add(key)
+        jobs.append({
+            "id": job_id,
+            "title": title,
+            "posting_date": str(item.get("posting_date", ""))[:40],
+            "url": url,
+        })
     return jobs
 
 
 def load_latest_jobs() -> tuple[list[dict[str, str]], str | None]:
     try:
-        state = json.loads((BASE_DIR / "data" / "seen_jobs.json").read_text(encoding="utf-8"))
+        state = json.loads(
+            (BASE_DIR / "data" / "seen_jobs.json").read_text(encoding="utf-8")
+        )
     except (OSError, json.JSONDecodeError):
         return [], None
     jobs = state.get("seen_jobs", [])
     return [job for job in jobs if isinstance(job, dict)], state.get("last_success_utc")
 
 
-def subscription_matches(subscription: Subscription, job: dict[str, str]) -> bool:
-    title = job["title"].casefold()
-    if "all" in subscription.role_types:
-        return True
-    role_match = any(any(keyword in title for keyword in ROLE_KEYWORDS.get(role, ()))
-                     for role in subscription.role_types)
-    keyword_match = any(keyword.casefold() in title for keyword in subscription.keywords)
-    return role_match or keyword_match
-
-
-def smtp_is_configured() -> bool:
-    return bool(os.getenv("SMTP_HOST", "").strip() and os.getenv("ALERT_EMAIL_FROM", "").strip())
-
-
-def send_job_email(app: Flask, subscription: Subscription, jobs: list[dict[str, str]]) -> None:
-    host = os.environ["SMTP_HOST"].strip()
-    port = int(os.getenv("SMTP_PORT", "465"))
-    username = os.getenv("SMTP_USERNAME", "").strip()
-    password = os.getenv("SMTP_PASSWORD", "")
-    sender = os.environ["ALERT_EMAIL_FROM"].strip()
-    serializer = URLSafeSerializer(app.config["SECRET_KEY"], salt="unsubscribe")
-    token = serializer.dumps(subscription.email)
-    base_url = app.config.get("BASE_URL") or request.url_root.rstrip("/")
-    unsubscribe_url = f"{base_url}/unsubscribe/{token}"
-
-    message = EmailMessage()
-    plural = "s" if len(jobs) != 1 else ""
-    message["Subject"] = f"{len(jobs)} new U of M job match{plural}"
-    message["From"] = sender
-    message["To"] = subscription.email
-    message.set_content(format_plain_email(jobs, unsubscribe_url))
-    message.add_alternative(format_html_email(jobs, unsubscribe_url), subtype="html")
-
-    context = ssl.create_default_context()
-    if port == 465:
-        with smtplib.SMTP_SSL(host, port, context=context, timeout=30) as smtp:
-            if username:
-                smtp.login(username, password)
-            smtp.send_message(message)
-    else:
-        with smtplib.SMTP(host, port, timeout=30) as smtp:
-            smtp.ehlo(); smtp.starttls(context=context); smtp.ehlo()
-            if username:
-                smtp.login(username, password)
-            smtp.send_message(message)
-
-
-def format_plain_email(jobs: Iterable[dict[str, str]], unsubscribe_url: str) -> str:
-    blocks = ["New University of Manitoba job matches"]
-    for job in jobs:
-        blocks.append("\n".join((job["title"], f"Requisition: {job['id']}",
-                                 f"Posted: {job['posting_date']}", job["url"])))
-    blocks.append(f"Unsubscribe: {unsubscribe_url}")
-    return "\n\n".join(blocks)
-
-
-def format_html_email(jobs: Iterable[dict[str, str]], unsubscribe_url: str) -> str:
-    cards = []
-    for job in jobs:
-        cards.append(f'''<div style="border:1px solid #e5e7eb;border-radius:12px;padding:18px;margin:0 0 14px">
-<div style="font-size:12px;color:#6b7280;margin-bottom:7px">Requisition {html.escape(job['id'])}</div>
-<h2 style="font-size:18px;line-height:1.35;margin:0 0 8px;color:#1f2937">{html.escape(job['title'])}</h2>
-<p style="margin:0 0 14px;color:#6b7280">Posted {html.escape(job['posting_date'])}</p>
-<a href="{html.escape(job['url'])}" style="display:inline-block;background:#7b1734;color:#fff;text-decoration:none;border-radius:8px;padding:10px 14px;font-weight:700">View posting</a></div>''')
-    return f'''<html><body style="margin:0;background:#f7f6f3;font-family:Arial,sans-serif;color:#1f2937"><div style="max-width:620px;margin:0 auto;padding:32px 18px"><div style="background:#fff;border-radius:16px;padding:26px"><div style="font-size:13px;font-weight:800;color:#7b1734">UM JOB ALERTS</div><h1>New jobs matched your preferences</h1>{''.join(cards)}<p style="font-size:12px;color:#6b7280">Independent alert service. Not affiliated with the University of Manitoba. <a href="{html.escape(unsubscribe_url)}">Unsubscribe</a>.</p></div></div></body></html>'''
-
-
-def mask_email(email: str) -> str:
-    local, _, domain = email.partition("@")
-    digest = hashlib.sha256(local.encode("utf-8")).hexdigest()[:6]
-    return f"user-{digest}@{domain}"
-
-
 app = create_app()
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=int(os.getenv("PORT", "5000")), debug=True)
+    app.run(
+        host="0.0.0.0",
+        port=int(os.getenv("PORT", "5000")),
+        debug=os.getenv("FLASK_DEBUG", "").casefold() in {"1", "true", "yes"},
+    )

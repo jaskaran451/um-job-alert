@@ -3,9 +3,10 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Get email alerts for new University of Manitoba jobs matching your interests.">
+  <meta name="description" content="Get email and Telegram alerts for new University of Manitoba jobs matching your interests.">
   <title>UM Job Alerts</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='telegram.css') }}">
   <script defer src="{{ url_for('static', filename='app.js') }}"></script>
 </head>
 <body>
@@ -18,7 +19,7 @@
     <div class="hero-copy">
       <div class="eyebrow"><span></span> Monitoring U of M careers every 30 minutes</div>
       <h1>Find the right U of M opportunity <em>before you miss it.</em></h1>
-      <p>Choose the roles and keywords you care about. We monitor public postings and email you when a new title matches.</p>
+      <p>Choose the roles and keywords you care about. We monitor public postings and notify you by email and, when connected, Telegram.</p>
       <div class="trust"><b>✓ No account needed</b><b>✓ No UM password</b><b>✓ Free alerts</b></div>
     </div>
     <div class="signup-card" id="subscribe">
@@ -44,22 +45,31 @@
         <div class="suggestions"><button type="button" data-keyword="COMP">+ COMP</button><button type="button" data-keyword="ECE">+ ECE</button><button type="button" data-keyword="Engineering">+ Engineering</button><button type="button" data-keyword="Computer Science">+ Computer Science</button></div>
         <div id="keyword-list" class="tags"></div>
         <div class="honeypot"><input id="company" type="text" tabindex="-1" autocomplete="off"></div>
-        <label class="consent"><input id="consent" type="checkbox"><span>I agree to receive job-alert emails. I can unsubscribe anytime.</span></label>
+        <label class="consent"><input id="consent" type="checkbox"><span>I agree to receive job-alert emails and optional Telegram alerts. I can unsubscribe anytime.</span></label>
         <p class="error" id="consent-error"></p>
-        <button class="primary" type="submit"><span>Create my alert</span><b>→</b></button>
+        <button class="primary" type="submit"><span>Save my alert</span><b>→</b></button>
         <div id="form-message" class="message" role="status"></div>
-        <p class="privacy">🔒 Your email is used only for these alerts.</p>
+        <section id="telegram-connect-panel" class="telegram-connect" hidden>
+          <div class="telegram-icon" aria-hidden="true">➤</div>
+          <div class="telegram-copy">
+            <strong>Get instant Telegram alerts</strong>
+            <p>Open the bot and press <b>Start</b>. The private link expires shortly and connects only this saved alert.</p>
+          </div>
+          <a id="telegram-connect-link" class="telegram-button" href="#" target="_blank" rel="noopener">Connect Telegram ↗</a>
+        </section>
+        {% if not telegram_available %}<p class="telegram-unavailable">Telegram linking will appear after the bot variables are configured on Railway.</p>{% endif %}
+        <p class="privacy">🔒 Your email and Telegram chat ID are used only for these alerts.</p>
       </form>
     </div>
   </section>
-  <section class="stats"><div><strong>30 min</strong><span>Monitoring interval</span></div><div><strong>{{ tracked_job_count }}</strong><span>Latest jobs tracked</span></div><div><strong>5</strong><span>Job boards checked</span></div><div><strong>1-click</strong><span>Unsubscribe</span></div></section>
+  <section class="stats"><div><strong>30 min</strong><span>Monitoring interval</span></div><div><strong>{{ tracked_job_count }}</strong><span>Latest jobs tracked</span></div><div><strong>5</strong><span>Job boards checked</span></div><div><strong>2</strong><span>Alert channels</span></div></section>
   <section class="latest shell" id="latest">
     <div class="section-head"><div><small>LIVE FROM THE MONITOR</small><h2>Recently detected postings</h2></div><a href="https://viprecprod.ad.umanitoba.ca/default" target="_blank" rel="noopener">Official job board ↗</a></div>
     <div class="jobs">
       {% for job in latest_jobs %}<article><div class="meta"><span>New</span><time>{{ job.posting_date }}</time></div><h3>{{ job.title }}</h3><p>Requisition {{ job.id }}</p><a href="{{ job.url }}" target="_blank" rel="noopener">View posting →</a></article>{% else %}<article class="empty"><h3>Waiting for the next update</h3><p>Recent postings will appear automatically.</p></article>{% endfor %}
     </div>
   </section>
-  <section class="how" id="how"><div class="shell"><div class="center"><small>SIMPLE BY DESIGN</small><h2>From new posting to your inbox</h2><p>The service monitors only public pages and never asks for University credentials.</p></div><div class="steps"><article><i>01</i><b>◷</b><h3>We check regularly</h3><p>Five public career boards are scanned twice each hour.</p></article><article><i>02</i><b>⌕</b><h3>We match your choices</h3><p>New titles are compared with your selected roles and keywords.</p></article><article><i>03</i><b>✉</b><h3>You receive the link</h3><p>A focused email takes you directly to the official posting.</p></article></div></div></section>
+  <section class="how" id="how"><div class="shell"><div class="center"><small>SIMPLE BY DESIGN</small><h2>From new posting to your phone</h2><p>The service monitors only public pages and never asks for University credentials.</p></div><div class="steps"><article><i>01</i><b>◷</b><h3>We check regularly</h3><p>Five public career boards are scanned twice each hour.</p></article><article><i>02</i><b>⌕</b><h3>We match your choices</h3><p>New titles are compared with your selected roles and keywords.</p></article><article><i>03</i><b>✉</b><h3>You receive the link</h3><p>Matching links arrive by email and in your connected Telegram chat.</p></article></div></div></section>
 </main>
 <footer><div class="shell footer"><div><a class="brand" href="#top"><span class="brand-mark">♢</span><span>UM Job Alerts</span></a><p>Helping students and job seekers discover relevant public postings sooner.</p></div><p>Independent project. Not affiliated with, endorsed by, or operated by the University of Manitoba.</p></div></footer>
 </body>

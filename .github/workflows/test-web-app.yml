@@ -1,0 +1,30 @@
+name: Test web app
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install dependencies
+        run: pip install --disable-pip-version-check -r requirements.txt
+      - name: Check Python syntax
+        run: python -m compileall -q app.py models.py delivery_service.py telegram_service.py configure_telegram_webhook.py verify_database.py
+      - name: Check JavaScript syntax
+        run: node --check static/app.js
+      - name: Run tests
+        run: python -m unittest discover -s tests -v
