@@ -1,6 +1,6 @@
 {
   "initialized": true,
-  "last_success_utc": "2026-08-04T07:26:47+00:00",
+  "last_success_utc": "2026-08-04T10:20:19+00:00",
   "seen_jobs": [
     {
       "id": "48849",
@@ -135,40 +135,16 @@
       "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48708&Language=1"
     },
     {
-      "id": "48699",
-      "posting_date": "Jul/28/2026",
-      "title": "Indigenous Health Research Navigator - Tech 5 (AESES)",
-      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48699&Language=1"
-    },
-    {
       "id": "48695",
       "posting_date": "Jul/28/2026",
       "title": "Post Doctoral Fellow",
       "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48695&Language=1"
     },
     {
-      "id": "48623",
-      "posting_date": "Jul/28/2026",
-      "title": "Microsoft Platform Analyst - IT2 (AESES)",
-      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48623&Language=1"
-    },
-    {
       "id": "48538",
       "posting_date": "Jul/27/2026",
       "title": "Change & Development Specialist - Level 7 (EMAPS)",
       "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48538&Language=1"
-    },
-    {
-      "id": "48532",
-      "posting_date": "Jul/24/2026",
-      "title": "Biochemical Technician - Tech 3 (AESES)",
-      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48532&Language=1"
-    },
-    {
-      "id": "48511",
-      "posting_date": "Jul/24/2026",
-      "title": "Aurora Finance Customer & Systems Supp. Rep. - OA4 (AESES)",
-      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48511&Language=1"
     },
     {
       "id": "48495",
@@ -189,34 +165,10 @@
       "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48455&Language=1"
     },
     {
-      "id": "48332",
-      "posting_date": "Jul/21/2026",
-      "title": "Administrative Secretary - OA5 (AESES)",
-      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48332&Language=1"
-    },
-    {
-      "id": "48321",
-      "posting_date": "Jul/21/2026",
-      "title": "Financial Coordinator - AA1 (AESES)",
-      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48321&Language=1"
-    },
-    {
-      "id": "48114",
-      "posting_date": "Jul/16/2026",
-      "title": "Garden Hill Renal Clinic Assistant - OA4 (AESES)",
-      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48114&Language=1"
-    },
-    {
       "id": "48060",
       "posting_date": "Jul/15/2026",
       "title": "Instructor I or II",
       "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48060&Language=1"
-    },
-    {
-      "id": "48024",
-      "posting_date": "Jul/15/2026",
-      "title": "Indigenous Cultural Coordinator - AA1 (AESES)",
-      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48024&Language=1"
     },
     {
       "id": "47977",
@@ -241,6 +193,54 @@
       "posting_date": "Jul/10/2026",
       "title": "Assistant or Associate Professor & CRC Tier 2",
       "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=47788&Language=1"
+    },
+    {
+      "id": "47742",
+      "posting_date": "Jul/09/2026",
+      "title": "Instructor I, Instructor II, Senior Instructor",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=47742&Language=1"
+    },
+    {
+      "id": "47194",
+      "posting_date": "Jun/25/2026",
+      "title": "Section Head (UNIFOR)",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=47194&Language=1"
+    },
+    {
+      "id": "47189",
+      "posting_date": "Jun/25/2026",
+      "title": "Food Services Worker",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=47189&Language=1"
+    },
+    {
+      "id": "45762",
+      "posting_date": "Jun/15/2026",
+      "title": "Caretaker - Nights (UNIFOR)",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=45762&Language=1"
+    },
+    {
+      "id": "46061",
+      "posting_date": "May/11/2026",
+      "title": "Food Services Cook (UNIFOR)",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=46061&Language=1"
+    },
+    {
+      "id": "44679",
+      "posting_date": "Mar/09/2026",
+      "title": "Caretaker - Nights (UNIFOR)",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=44679&Language=1"
+    },
+    {
+      "id": "31119",
+      "posting_date": "Jan/17/2024",
+      "title": "Renal Nurse - LPN- Nurses in Northern Manitoba (EMAPS)",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=31119&Language=1"
+    },
+    {
+      "id": "31117",
+      "posting_date": "Jan/17/2024",
+      "title": "Renal Nurse - RN- Nurses in Northern Manitoba (EMAPS)",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=31117&Language=1"
     }
   ],
   "version": 2
