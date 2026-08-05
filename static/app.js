@@ -30,13 +30,26 @@ if (form) {
     }
 
     function addKeyword(value) {
-        const keyword = value.trim().replace(/\s+/g, ' ').replace(/^,+|,+$/g, '');
-        if (keyword.length < 2 || keyword.length > 40 || keywords.length >= 8) {
+        const keyword = value
+            .trim()
+            .replace(/\s+/g, ' ')
+            .replace(/^,+|,+$/g, '');
+
+        if (
+            keyword.length < 2
+            || keyword.length > 40
+            || keywords.length >= 8
+        ) {
             return;
         }
-        if (!keywords.some(existing => existing.toLowerCase() === keyword.toLowerCase())) {
+
+        const alreadyAdded = keywords.some(
+            existing => existing.toLowerCase() === keyword.toLowerCase()
+        );
+        if (!alreadyAdded) {
             keywords.push(keyword);
         }
+
         input.value = '';
         renderKeywords();
     }
@@ -48,13 +61,19 @@ if (form) {
             addKeyword(input.value);
         }
     });
+
     document.querySelectorAll('[data-keyword]').forEach(button => {
-        button.addEventListener('click', () => addKeyword(button.dataset.keyword));
+        button.addEventListener(
+            'click',
+            () => addKeyword(button.dataset.keyword)
+        );
     });
 
     const allRoles = form.querySelector('input[value="all"]');
-    const specificRoles = [...form.querySelectorAll('input[name="role_type"]')]
-        .filter(role => role !== allRoles);
+    const specificRoles = [
+        ...form.querySelectorAll('input[name="role_type"]')
+    ].filter(role => role !== allRoles);
+
     allRoles.addEventListener('change', () => {
         if (allRoles.checked) {
             specificRoles.forEach(role => {
@@ -62,6 +81,7 @@ if (form) {
             });
         }
     });
+
     specificRoles.forEach(role => {
         role.addEventListener('change', () => {
             if (role.checked) {
@@ -72,12 +92,17 @@ if (form) {
 
     form.addEventListener('submit', async event => {
         event.preventDefault();
-        ['email', 'preferences', 'consent'].forEach(name => {
-            document.querySelector(`#${name}-error`).textContent = '';
+
+        ['preferences', 'consent'].forEach(name => {
+            const error = document.querySelector(`#${name}-error`);
+            if (error) {
+                error.textContent = '';
+            }
         });
 
         const message = document.querySelector('#form-message');
         const submitButton = form.querySelector('.primary');
+
         message.className = 'message';
         message.textContent = '';
         telegramPanel.hidden = true;
@@ -85,9 +110,11 @@ if (form) {
         submitButton.disabled = true;
 
         const payload = {
-            email: document.querySelector('#email').value,
-            role_types: [...form.querySelectorAll('input[name="role_type"]:checked')]
-                .map(role => role.value),
+            role_types: [
+                ...form.querySelectorAll(
+                    'input[name="role_type"]:checked'
+                )
+            ].map(role => role.value),
             keywords,
             consent: document.querySelector('#consent').checked,
             company: document.querySelector('#company').value
@@ -102,25 +129,39 @@ if (form) {
             const result = await response.json();
 
             if (!response.ok) {
-                Object.entries(result.errors || {}).forEach(([name, error]) => {
-                    const element = document.querySelector(`#${name}-error`);
-                    if (element) {
-                        element.textContent = error;
+                Object.entries(result.errors || {}).forEach(
+                    ([name, error]) => {
+                        const element = document.querySelector(
+                            `#${name}-error`
+                        );
+                        if (element) {
+                            element.textContent = error;
+                        }
                     }
-                });
-                throw new Error(result.message || 'Could not save your alert.');
+                );
+                throw new Error(
+                    result.message || 'Could not create your alert.'
+                );
+            }
+
+            if (!result.telegram_connect_url) {
+                throw new Error(
+                    'Telegram connection is temporarily unavailable.'
+                );
             }
 
             message.className = 'message success';
-            message.textContent = `Alert saved. We’ll email ${result.email} when a new title matches.`;
+            message.textContent = (
+                'Preferences saved. Connect Telegram below to activate your alert.'
+            );
 
-            if (result.telegram_connect_url) {
-                telegramLink.href = result.telegram_connect_url;
-                telegramLink.textContent = result.telegram_connected
-                    ? 'Reconnect Telegram ↗'
-                    : 'Connect Telegram ↗';
-                telegramPanel.hidden = false;
-            }
+            telegramLink.href = result.telegram_connect_url;
+            telegramLink.textContent = 'Connect Telegram ↗';
+            telegramPanel.hidden = false;
+            telegramPanel.scrollIntoView({
+                behavior: 'smooth',
+                block: 'nearest'
+            });
         } catch (error) {
             if (!message.textContent) {
                 message.className = 'message error-box';
