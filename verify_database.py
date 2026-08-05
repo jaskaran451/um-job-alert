@@ -20,7 +20,10 @@ def main() -> int:
         )
         return 1
 
-    from app import Delivery, Subscription, TelegramConnection, app
+    # Import the Flask application for its configured SQLAlchemy engine.
+    # Database models live in models.py, not app.py.
+    from app import app
+    from models import Delivery, Subscription, TelegramConnection
 
     engine = app.extensions["database_engine"]
 
