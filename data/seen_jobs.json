@@ -1,12 +1,84 @@
 {
   "initialized": true,
-  "last_success_utc": "2026-08-05T04:31:56+00:00",
+  "last_success_utc": "2026-08-05T18:56:04+00:00",
   "seen_jobs": [
     {
-      "id": "48904",
-      "posting_date": "Aug/04/2026",
-      "title": "TA - CHEM2122",
-      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48904&Language=1"
+      "id": "48944",
+      "posting_date": "Aug/05/2026",
+      "title": "System and Data Engineer - IT4 (AESES)",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48944&Language=1"
+    },
+    {
+      "id": "48941",
+      "posting_date": "Aug/05/2026",
+      "title": "Admissions Officer - AA2 (AESES)",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48941&Language=1"
+    },
+    {
+      "id": "48938",
+      "posting_date": "Aug/05/2026",
+      "title": "Grader/Marker CLAS 1280 (CUPE Student)",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48938&Language=1"
+    },
+    {
+      "id": "48936",
+      "posting_date": "Aug/05/2026",
+      "title": "TA (Teaching Assistant) LATN 1080 (CUPE Student)",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48936&Language=1"
+    },
+    {
+      "id": "48935",
+      "posting_date": "Aug/05/2026",
+      "title": "Research & Laboratory Support Specialist - Tech 4 (AESES)",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48935&Language=1"
+    },
+    {
+      "id": "48933",
+      "posting_date": "Aug/05/2026",
+      "title": "Sessional Instructor - EDUA 5620 (Repost)",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48933&Language=1"
+    },
+    {
+      "id": "48929",
+      "posting_date": "Aug/05/2026",
+      "title": "Sessional Instructor - BIOE 7380",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48929&Language=1"
+    },
+    {
+      "id": "48921",
+      "posting_date": "Aug/05/2026",
+      "title": "Sessional Instructor- SWRK 7004- Spanned",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48921&Language=1"
+    },
+    {
+      "id": "48920",
+      "posting_date": "Aug/05/2026",
+      "title": "Sessional Instructor- SWRK 7002 A01- Fall 2026",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48920&Language=1"
+    },
+    {
+      "id": "48913",
+      "posting_date": "Aug/05/2026",
+      "title": "Sessional Instructor - DS 7040 (CUPE Sessional)",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48913&Language=1"
+    },
+    {
+      "id": "48911",
+      "posting_date": "Aug/05/2026",
+      "title": "Student Sessional Instructor - AGRI 1600 K01 - Fall 2026",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48911&Language=1"
+    },
+    {
+      "id": "48910",
+      "posting_date": "Aug/05/2026",
+      "title": "TA/Demo/TUR/Sem. Leaders - AGRI 2400 (CUPE Students)",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48910&Language=1"
+    },
+    {
+      "id": "48908",
+      "posting_date": "Aug/05/2026",
+      "title": "Grader/Marker - ENTM 3190 (CUPE Students)",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48908&Language=1"
     },
     {
       "id": "48902",
@@ -45,40 +117,10 @@
       "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48895&Language=1"
     },
     {
-      "id": "48890",
-      "posting_date": "Aug/04/2026",
-      "title": "Director Office of Community Engagement - Level 7 (EMAPS)",
-      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48890&Language=1"
-    },
-    {
-      "id": "48888",
-      "posting_date": "Aug/04/2026",
-      "title": "Student Lecturer",
-      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48888&Language=1"
-    },
-    {
       "id": "48886",
       "posting_date": "Aug/04/2026",
       "title": "Regional Distributed Medical Education Lead - Interlake Regi",
       "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48886&Language=1"
-    },
-    {
-      "id": "48866",
-      "posting_date": "Aug/04/2026",
-      "title": "Teaching Assistant - EDUB 4146",
-      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48866&Language=1"
-    },
-    {
-      "id": "48865",
-      "posting_date": "Aug/04/2026",
-      "title": "GMGT 1010 A04 SESSIONAL",
-      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48865&Language=1"
-    },
-    {
-      "id": "48864",
-      "posting_date": "Aug/04/2026",
-      "title": "Teaching Assistant - EDUB 4102",
-      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48864&Language=1"
     },
     {
       "id": "48860",
@@ -105,36 +147,6 @@
       "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48857&Language=1"
     },
     {
-      "id": "48154",
-      "posting_date": "Aug/04/2026",
-      "title": "Sessional Instructor, HNSC 1210 A01",
-      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48154&Language=1"
-    },
-    {
-      "id": "48152",
-      "posting_date": "Aug/04/2026",
-      "title": "Sessional Instructor, HNSC 2000",
-      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48152&Language=1"
-    },
-    {
-      "id": "48149",
-      "posting_date": "Aug/04/2026",
-      "title": "Sessional Instructor, HNSC 3320",
-      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48149&Language=1"
-    },
-    {
-      "id": "48147",
-      "posting_date": "Aug/04/2026",
-      "title": "Sessional Instructor, FOOD 1000",
-      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48147&Language=1"
-    },
-    {
-      "id": "48145",
-      "posting_date": "Aug/04/2026",
-      "title": "Sessional Instructor, FOOD 4010",
-      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48145&Language=1"
-    },
-    {
       "id": "48849",
       "posting_date": "Jul/31/2026",
       "title": "Biological Technician - Tech 3 (AESES)",
@@ -157,24 +169,6 @@
       "posting_date": "Jul/31/2026",
       "title": "Project Development Lead",
       "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48816&Language=1"
-    },
-    {
-      "id": "48798",
-      "posting_date": "Jul/30/2026",
-      "title": "Graduate Program Assistant - OA5 (AESES)",
-      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48798&Language=1"
-    },
-    {
-      "id": "48782",
-      "posting_date": "Jul/30/2026",
-      "title": "Multimedia and Graphic Designer - OA5 (AESES)",
-      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48782&Language=1"
-    },
-    {
-      "id": "48777",
-      "posting_date": "Jul/30/2026",
-      "title": "Science Co-op Program Assistant - OA5 (AESES)",
-      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48777&Language=1"
     },
     {
       "id": "48708",
@@ -229,6 +223,12 @@
       "posting_date": "Jun/25/2026",
       "title": "Food Services Worker",
       "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=47189&Language=1"
+    },
+    {
+      "id": "46919",
+      "posting_date": "Jun/18/2026",
+      "title": "Light Equipment Operator - Light Equipment Operator (Unifor)",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=46919&Language=1"
     },
     {
       "id": "45762",
