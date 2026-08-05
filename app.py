@@ -3,24 +3,16 @@ from __future__ import annotations
 import hmac
 import json
 import os
-import re
+import secrets
 from pathlib import Path
 from typing import Any
 
 from flask import Flask, jsonify, render_template, request
-from itsdangerous import BadSignature, URLSafeSerializer
-from sqlalchemy import create_engine, select, text
+from sqlalchemy import create_engine, text
 from sqlalchemy.orm import Session
 
-from delivery_service import dispatch_to_subscribers, smtp_is_configured
-from models import (
-    Base,
-    Delivery,
-    Subscription,
-    TelegramConnection,
-    normalize_database_url,
-    utc_now,
-)
+from delivery_service import dispatch_to_subscribers
+from models import Base, Subscription, normalize_database_url, utc_now
 from telegram_service import (
     TelegramAPIError,
     issue_telegram_connect_link,
@@ -32,10 +24,13 @@ from telegram_service import (
 
 
 BASE_DIR = Path(__file__).resolve().parent
-EMAIL_PATTERN = re.compile(r"^[^\s@]+@[^\s@]+\.[^\s@]+$")
 ALLOWED_ROLE_TYPES = {
-    "all", "teaching_assistant", "grader_marker",
-    "instructor_sessionals", "technical_it", "research",
+    "all",
+    "teaching_assistant",
+    "grader_marker",
+    "instructor_sessionals",
+    "technical_it",
+    "research",
 }
 
 
@@ -44,24 +39,44 @@ def create_app(test_config: dict[str, Any] | None = None) -> Flask:
     app.config.update(
         SECRET_KEY=os.getenv("APP_SECRET_KEY", "development-only-change-me"),
         DATABASE_URL=normalize_database_url(
-            os.getenv("DATABASE_URL", f"sqlite:///{BASE_DIR / 'data' / 'subscribers.db'}")
+            os.getenv(
+                "DATABASE_URL",
+                f"sqlite:///{BASE_DIR / 'data' / 'subscribers.db'}",
+            )
         ),
         DISPATCH_API_KEY=os.getenv("DISPATCH_API_KEY", ""),
         BASE_URL=os.getenv("BASE_URL", "").rstrip("/"),
         TELEGRAM_BOT_TOKEN=os.getenv("TELEGRAM_BOT_TOKEN", "").strip(),
-        TELEGRAM_BOT_USERNAME=os.getenv("TELEGRAM_BOT_USERNAME", "").strip().lstrip("@"),
-        TELEGRAM_WEBHOOK_SECRET=os.getenv("TELEGRAM_WEBHOOK_SECRET", "").strip(),
-        TELEGRAM_CONNECT_TTL_MINUTES=int(os.getenv("TELEGRAM_CONNECT_TTL_MINUTES", "30")),
+        TELEGRAM_BOT_USERNAME=os.getenv("TELEGRAM_BOT_USERNAME", "")
+        .strip()
+        .lstrip("@"),
+        TELEGRAM_WEBHOOK_SECRET=os.getenv(
+            "TELEGRAM_WEBHOOK_SECRET", ""
+        ).strip(),
+        TELEGRAM_CONNECT_TTL_MINUTES=int(
+            os.getenv("TELEGRAM_CONNECT_TTL_MINUTES", "30")
+        ),
     )
     if test_config:
         app.config.update(test_config)
 
     database_url = app.config["DATABASE_URL"]
     if database_url.startswith("sqlite:///"):
-        Path(database_url.removeprefix("sqlite:///")).parent.mkdir(parents=True, exist_ok=True)
-    connect_args = {"check_same_thread": False} if database_url.startswith("sqlite") else {}
+        Path(database_url.removeprefix("sqlite:///")).parent.mkdir(
+            parents=True,
+            exist_ok=True,
+        )
+
+    connect_args = (
+        {"check_same_thread": False}
+        if database_url.startswith("sqlite")
+        else {}
+    )
     engine = create_engine(
-        database_url, pool_pre_ping=True, pool_recycle=300, connect_args=connect_args
+        database_url,
+        pool_pre_ping=True,
+        pool_recycle=300,
+        connect_args=connect_args,
     )
     Base.metadata.create_all(engine)
     app.extensions["database_engine"] = engine
@@ -85,121 +100,127 @@ def create_app(test_config: dict[str, Any] | None = None) -> Flask:
         except Exception:
             app.logger.exception("Database health check failed")
             return jsonify(status="error", database="unavailable"), 503
-        return jsonify(status="ok", database=engine.url.get_backend_name())
+
+        return jsonify(
+            status="ok",
+            database=engine.url.get_backend_name(),
+            telegram=telegram_linking_is_configured(app),
+        )
 
     @app.post("/api/subscriptions")
     def create_subscription():
         payload = request.get_json(silent=True) or {}
         if payload.get("company"):
-            return jsonify(message="Subscription saved."), 201
+            return jsonify(message="Preferences saved."), 201
 
-        email = str(payload.get("email", "")).strip().casefold()
         role_types = sanitize_role_types(payload.get("role_types"))
         keywords = sanitize_keywords(payload.get("keywords"))
         errors: dict[str, str] = {}
-        if not EMAIL_PATTERN.fullmatch(email) or len(email) > 254:
-            errors["email"] = "Enter a valid email address."
-        if not role_types and not keywords:
-            errors["preferences"] = "Choose at least one role type or keyword."
-        if payload.get("consent") is not True:
-            errors["consent"] = "Consent is required to send job alerts."
-        if errors:
-            return jsonify(message="Please review the highlighted fields.", errors=errors), 400
 
-        with Session(engine) as session:
-            subscription = session.scalar(
-                select(Subscription).where(Subscription.email == email)
+        if not role_types and not keywords:
+            errors["preferences"] = (
+                "Choose at least one role type or keyword."
             )
-            if subscription is None:
-                subscription = Subscription(email=email)
-                session.add(subscription)
-                session.flush()
-            subscription.role_types_json = json.dumps(role_types)
-            subscription.keywords_json = json.dumps(keywords)
-            subscription.active = True
-            subscription.updated_at = utc_now()
+        if payload.get("consent") is not True:
+            errors["consent"] = (
+                "Consent is required to send Telegram job alerts."
+            )
+        if errors:
+            return jsonify(
+                message="Please review the highlighted fields.",
+                errors=errors,
+            ), 400
+
+        if not telegram_linking_is_configured(app):
+            return jsonify(
+                message=(
+                    "Telegram alerts are temporarily unavailable. "
+                    "Please try again after the bot is configured."
+                )
+            ), 503
+
+        internal_identifier = (
+            f"telegram-{secrets.token_urlsafe(18).lower()}@alerts.invalid"
+        )
+        with Session(engine) as session:
+            subscription = Subscription(
+                email=internal_identifier,
+                role_types_json=json.dumps(role_types),
+                keywords_json=json.dumps(keywords),
+                active=True,
+                updated_at=utc_now(),
+            )
+            session.add(subscription)
+            session.flush()
             subscription_id = subscription.id
             session.commit()
 
-        connect_url = None
-        connected = False
-        if telegram_linking_is_configured(app):
-            connect_url, connected = issue_telegram_connect_link(
-                app, engine, subscription_id
-            )
+        connect_url, connected = issue_telegram_connect_link(
+            app,
+            engine,
+            subscription_id,
+        )
 
         return jsonify(
-            message="Your alert preferences are saved.",
-            email=email,
+            message=(
+                "Preferences saved. Connect Telegram to activate your alert."
+            ),
             role_types=role_types,
             keywords=keywords,
-            telegram_available=bool(connect_url),
+            telegram_available=True,
             telegram_connected=connected,
             telegram_connect_url=connect_url,
-            telegram_connect_expires_minutes=app.config["TELEGRAM_CONNECT_TTL_MINUTES"],
+            telegram_connect_expires_minutes=app.config[
+                "TELEGRAM_CONNECT_TTL_MINUTES"
+            ],
         ), 201
 
     @app.post("/api/internal/dispatch")
     def dispatch_jobs():
         configured_key = app.config.get("DISPATCH_API_KEY", "")
         supplied_key = request.headers.get("X-Dispatch-Key", "")
-        if not configured_key or not hmac.compare_digest(configured_key, supplied_key):
+        if not configured_key or not hmac.compare_digest(
+            configured_key,
+            supplied_key,
+        ):
             return jsonify(message="Unauthorized."), 401
 
-        jobs = sanitize_jobs((request.get_json(silent=True) or {}).get("jobs"))
+        jobs = sanitize_jobs(
+            (request.get_json(silent=True) or {}).get("jobs")
+        )
         if not jobs:
             return jsonify(message="No valid jobs supplied."), 400
 
-        email_available = smtp_is_configured()
-        telegram_available = telegram_sending_is_configured(app)
-        if not email_available and not telegram_available:
-            return jsonify(message="Neither email nor Telegram delivery is configured."), 503
+        if not telegram_sending_is_configured(app):
+            return jsonify(
+                message="Telegram delivery is not configured."
+            ), 503
 
-        result = dispatch_to_subscribers(
-            app, engine, jobs,
-            email_available=email_available,
-            telegram_available=telegram_available,
-        )
+        result = dispatch_to_subscribers(app, engine, jobs)
         return jsonify(**result), 200 if not result["failed"] else 207
 
     @app.post("/api/telegram/webhook")
     def telegram_webhook():
-        supplied_secret = request.headers.get("X-Telegram-Bot-Api-Secret-Token", "")
+        supplied_secret = request.headers.get(
+            "X-Telegram-Bot-Api-Secret-Token",
+            "",
+        )
         if not validate_webhook_secret(app, supplied_secret):
             return jsonify(ok=False), 401
+
         try:
-            process_telegram_update(app, engine, request.get_json(silent=True) or {})
+            process_telegram_update(
+                app,
+                engine,
+                request.get_json(silent=True) or {},
+            )
         except TelegramAPIError:
             app.logger.exception("Could not reply to Telegram update")
         except Exception:
             app.logger.exception("Could not process Telegram update")
             return jsonify(ok=False), 500
-        return jsonify(ok=True)
 
-    @app.get("/unsubscribe/<token>")
-    def unsubscribe(token: str):
-        serializer = URLSafeSerializer(app.config["SECRET_KEY"], salt="unsubscribe")
-        try:
-            email = serializer.loads(token)
-        except BadSignature:
-            return render_template("unsubscribe.html", success=False), 400
-        with Session(engine) as session:
-            subscription = session.scalar(
-                select(Subscription).where(Subscription.email == str(email).casefold())
-            )
-            if subscription:
-                subscription.active = False
-                subscription.updated_at = utc_now()
-                telegram = session.scalar(
-                    select(TelegramConnection).where(
-                        TelegramConnection.subscription_id == subscription.id
-                    )
-                )
-                if telegram:
-                    telegram.enabled = False
-                    telegram.updated_at = utc_now()
-                session.commit()
-        return render_template("unsubscribe.html", success=True)
+        return jsonify(ok=True)
 
     return app
 
@@ -207,6 +228,7 @@ def create_app(test_config: dict[str, Any] | None = None) -> Flask:
 def sanitize_role_types(value: Any) -> list[str]:
     if not isinstance(value, list):
         return []
+
     result: list[str] = []
     for item in value:
         role = str(item).strip()
@@ -218,12 +240,15 @@ def sanitize_role_types(value: Any) -> list[str]:
 def sanitize_keywords(value: Any) -> list[str]:
     if not isinstance(value, list):
         return []
+
     result: list[str] = []
     for item in value:
         keyword = " ".join(str(item).split()).strip(" ,")
-        if 2 <= len(keyword) <= 40 and keyword.casefold() not in {
-            existing.casefold() for existing in result
-        }:
+        if (
+            2 <= len(keyword) <= 40
+            and keyword.casefold()
+            not in {existing.casefold() for existing in result}
+        ):
             result.append(keyword)
     return result[:8]
 
@@ -231,38 +256,59 @@ def sanitize_keywords(value: Any) -> list[str]:
 def sanitize_jobs(value: Any) -> list[dict[str, str]]:
     if not isinstance(value, list):
         return []
+
     jobs: list[dict[str, str]] = []
     seen: set[tuple[str, str]] = set()
     for item in value[:50]:
         if not isinstance(item, dict):
             continue
+
         title = " ".join(str(item.get("title", "")).split())[:200]
-        url = str(item.get("url") or item.get("detail_url") or "").strip()[:500]
-        job_id = str(item.get("id") or item.get("requisition_id") or "")[:30]
-        if not title or not url.startswith("https://viprecprod.ad.umanitoba.ca/"):
+        url = str(
+            item.get("url") or item.get("detail_url") or ""
+        ).strip()[:500]
+        job_id = str(
+            item.get("id") or item.get("requisition_id") or ""
+        )[:30]
+
+        if not title or not url.startswith(
+            "https://viprecprod.ad.umanitoba.ca/"
+        ):
             continue
+
         key = (job_id, url)
         if key in seen:
             continue
         seen.add(key)
-        jobs.append({
-            "id": job_id,
-            "title": title,
-            "posting_date": str(item.get("posting_date", ""))[:40],
-            "url": url,
-        })
+
+        jobs.append(
+            {
+                "id": job_id,
+                "title": title,
+                "posting_date": str(
+                    item.get("posting_date", "")
+                )[:40],
+                "url": url,
+            }
+        )
     return jobs
 
 
 def load_latest_jobs() -> tuple[list[dict[str, str]], str | None]:
     try:
         state = json.loads(
-            (BASE_DIR / "data" / "seen_jobs.json").read_text(encoding="utf-8")
+            (BASE_DIR / "data" / "seen_jobs.json").read_text(
+                encoding="utf-8"
+            )
         )
     except (OSError, json.JSONDecodeError):
         return [], None
+
     jobs = state.get("seen_jobs", [])
-    return [job for job in jobs if isinstance(job, dict)], state.get("last_success_utc")
+    return (
+        [job for job in jobs if isinstance(job, dict)],
+        state.get("last_success_utc"),
+    )
 
 
 app = create_app()
@@ -271,5 +317,6 @@ if __name__ == "__main__":
     app.run(
         host="0.0.0.0",
         port=int(os.getenv("PORT", "5000")),
-        debug=os.getenv("FLASK_DEBUG", "").casefold() in {"1", "true", "yes"},
+        debug=os.getenv("FLASK_DEBUG", "").casefold()
+        in {"1", "true", "yes"},
     )
