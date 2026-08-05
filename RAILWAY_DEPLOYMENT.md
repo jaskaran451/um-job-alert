@@ -1,19 +1,18 @@
 # Deploy the UM Job Alerts website on Railway
 
-The GitHub Actions monitor checks the University of Manitoba job portal.
-Railway hosts the signup website, PostgreSQL subscriber database, and protected
-email-dispatch API.
+GitHub Actions checks the University of Manitoba job portal. Railway hosts the
+public website, PostgreSQL preferences database, protected dispatch API, and
+Telegram webhook. Public subscribers receive alerts only through Telegram.
 
 ## 1. Connect the web service to PostgreSQL
 
-The PostgreSQL service and the web service must be in the same Railway project.
+The PostgreSQL service and web service must be in the same Railway project.
 
 1. Open the **web application service**, not the Postgres service.
 2. Open **Variables**.
-3. Click **New Variable** or **Add Reference Variable**.
-4. Select the PostgreSQL service.
-5. Select its `DATABASE_URL` variable.
-6. Save and deploy the staged changes.
+3. Choose **Add Reference Variable**.
+4. Select the PostgreSQL service and its `DATABASE_URL`.
+5. Deploy the staged changes.
 
 When the database service is named `Postgres`, the web service should show:
 
@@ -21,97 +20,64 @@ When the database service is named `Postgres`, the web service should show:
 DATABASE_URL=${{Postgres.DATABASE_URL}}
 ```
 
-Use the reference variable instead of copying the database password or public
-connection URL. Railway will then use the private connection available inside
-the project.
-
-The repository's `railway.json` runs this command before every deployment:
+The repository runs this before each deployment:
 
 ```text
-python verify_database.py
+python verify_database.py && python configure_telegram_webhook.py
 ```
 
-The deployment will stop if `DATABASE_URL` is missing, PostgreSQL cannot be
-reached, or the `subscriptions` table cannot be initialized.
-
-A successful deployment log contains output similar to:
-
-```json
-{"database":"postgresql","status":"ok","subscriber_count":0,"subscriptions_table":true}
-```
+Deployment stops if PostgreSQL is unavailable or Telegram cannot be configured.
 
 ## 2. Generate the public website domain
 
-1. Open the web service.
-2. Go to **Settings → Networking**.
-3. Click **Generate Domain**.
-4. Copy the generated hostname.
-
-Add this variable to the web service:
+Open **Settings → Networking → Generate Domain**, then add:
 
 ```text
 BASE_URL=https://${{RAILWAY_PUBLIC_DOMAIN}}
 ```
 
-This keeps unsubscribe links synchronized with the current Railway domain.
+The Telegram webhook must use the public HTTPS domain.
 
-## 3. Add the remaining web-service variables
-
-Add these variables to the Railway web service:
+## 3. Add web-service variables
 
 ```text
 APP_SECRET_KEY=<long-random-secret>
 DISPATCH_API_KEY=<different-long-random-secret>
-SMTP_HOST=smtp.gmail.com
-SMTP_PORT=465
-SMTP_USERNAME=your-email@gmail.com
-SMTP_PASSWORD=your-16-character-Google-app-password
-ALERT_EMAIL_FROM=your-email@gmail.com
+TELEGRAM_BOT_TOKEN=<BotFather token>
+TELEGRAM_BOT_USERNAME=<username without @>
+TELEGRAM_WEBHOOK_SECRET=<another-long-random-secret>
+TELEGRAM_CONNECT_TTL_MINUTES=30
 ```
 
-Generate `APP_SECRET_KEY` and `DISPATCH_API_KEY` independently:
+Generate independent secrets with:
 
 ```bash
 python -c "import secrets; print(secrets.token_urlsafe(48))"
 ```
 
-For Gmail, enable two-step verification and create a Google app password. Do
-not use or store the normal Google account password.
+No SMTP or email variables are required. The public website does not collect an
+email address and does not send subscriber emails.
 
-After changing Railway variables, review and deploy the staged changes.
+## 4. Verify the deployment
 
-## 4. Verify PostgreSQL persistence
-
-Open the following pages:
+Open:
 
 ```text
 https://your-domain.up.railway.app/
 https://your-domain.up.railway.app/healthz
 ```
 
-The health endpoint should return:
+The health endpoint should report PostgreSQL and Telegram availability. In the
+deployment logs, confirm that database verification succeeds and the webhook is
+configured for:
 
-```json
-{"status":"ok"}
+```text
+https://your-domain.up.railway.app/api/telegram/webhook
 ```
-
-Then perform this persistence test:
-
-1. Submit your own email address through the website signup form.
-2. Redeploy the web service without deleting PostgreSQL.
-3. Check the pre-deploy log from `verify_database.py`.
-4. Confirm `subscriber_count` is at least `1`.
-5. Submit the same email with different preferences and redeploy again.
-6. Confirm the count does not increase; the existing subscription is updated.
-
-This proves that subscribers are stored in PostgreSQL rather than Railway's
-ephemeral application filesystem.
 
 ## 5. Connect GitHub Actions to Railway
 
-In GitHub, open:
-
-**Repository → Settings → Secrets and variables → Actions**
+In GitHub, open **Settings → Secrets and variables → Actions**.
 
 Add this Actions variable:
 
@@ -125,51 +91,27 @@ Add this Actions secret:
 SUBSCRIBER_API_KEY=<same value as Railway DISPATCH_API_KEY>
 ```
 
-The values of `SUBSCRIBER_API_KEY` and `DISPATCH_API_KEY` must match exactly.
 The scheduled workflow sends only newly detected jobs to Railway's protected
 `/api/internal/dispatch` endpoint.
 
-## 6. Test email delivery directly
+## 6. Test Telegram delivery
 
-First, subscribe your own address and choose **All postings**. Then run this
-from a terminal, replacing the URL and key:
+1. Open the live website.
+2. Choose **All new postings**.
+3. Accept Telegram notifications and click **Create Telegram alert**.
+4. Click **Connect Telegram** and press **Start** in the bot.
+5. Send `/status` and confirm alerts are active.
+6. Run this protected test dispatch:
 
 ```bash
 curl -X POST "https://your-domain.up.railway.app/api/internal/dispatch" \
   -H "Content-Type: application/json" \
   -H "X-Dispatch-Key: YOUR_DISPATCH_API_KEY" \
-  -d '{
-    "jobs": [
-      {
-        "id": "TEST-001",
-        "title": "Test posting - UM Job Alerts is connected",
-        "posting_date": "Aug/04/2026",
-        "url": "https://viprecprod.ad.umanitoba.ca/default"
-      }
-    ]
-  }'
+  -d '{"jobs":[{"id":"TEST-TELEGRAM-001","title":"Test posting - UM Job Alerts is connected","posting_date":"Aug/05/2026","url":"https://viprecprod.ad.umanitoba.ca/default"}]}'
 ```
 
-A successful response should report one matching subscriber and one delivered
-email. Remove the command from shell history afterward because it contains the
-dispatch key.
-
-## 7. Confirm the scheduled workflow
-
-Open **GitHub → Actions → UM Job Alert → Run workflow**.
-
-A normal run with no new posting will not email subscribers, but the following
-steps should succeed:
-
-```text
-Run monitor or Telegram test
-Dispatch new jobs to website subscribers
-Save updated job history
-```
-
-When a genuinely new posting appears, GitHub Actions sends it to Railway,
-Railway reads preferences from PostgreSQL, and matching subscribers receive an
-email.
+Use a new test job ID for each repeat because successful Telegram deliveries are
+recorded and intentionally not sent twice.
 
 ## Production architecture
 
@@ -178,16 +120,16 @@ University of Manitoba public job portal
                  |
                  v
       GitHub Actions monitor
-          |             |
-          v             v
- personal Telegram   Railway dispatch API
-                           |
-                           v
-                  PostgreSQL subscribers
-                           |
-                           v
-                    Personalized email
+                 |
+                 v
+        Railway dispatch API
+                 |
+                 v
+      PostgreSQL preferences
+                 |
+                 v
+       Personalized Telegram
 ```
 
-The public website is an independent alert service and is not affiliated with
-the University of Manitoba.
+The website is an independent project and is not affiliated with the University
+of Manitoba.

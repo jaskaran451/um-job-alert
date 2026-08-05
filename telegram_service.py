@@ -26,7 +26,11 @@ TELEGRAM_START_PATTERN = re.compile(
 
 
 class TelegramAPIError(RuntimeError):
-    def __init__(self, description: str, error_code: int | None = None) -> None:
+    def __init__(
+        self,
+        description: str,
+        error_code: int | None = None,
+    ) -> None:
         super().__init__(description)
         self.description = description
         self.error_code = error_code
@@ -52,9 +56,15 @@ def telegram_sending_is_configured(app: Flask) -> bool:
     return bool(app.config.get("TELEGRAM_BOT_TOKEN"))
 
 
-def issue_telegram_connect_link(app: Flask, engine, subscription_id: int) -> tuple[str, bool]:
+def issue_telegram_connect_link(
+    app: Flask,
+    engine,
+    subscription_id: int,
+) -> tuple[str, bool]:
     raw_token = secrets.token_urlsafe(24)
-    token_hash = hashlib.sha256(raw_token.encode("utf-8")).hexdigest()
+    token_hash = hashlib.sha256(
+        raw_token.encode("utf-8")
+    ).hexdigest()
     expires_at = utc_now() + timedelta(
         minutes=app.config["TELEGRAM_CONNECT_TTL_MINUTES"]
     )
@@ -66,36 +76,59 @@ def issue_telegram_connect_link(app: Flask, engine, subscription_id: int) -> tup
             )
         )
         if connection is None:
-            connection = TelegramConnection(subscription_id=subscription_id)
+            connection = TelegramConnection(
+                subscription_id=subscription_id
+            )
             session.add(connection)
-        already_connected = bool(connection.enabled and connection.chat_id)
+
+        already_connected = bool(
+            connection.enabled and connection.chat_id
+        )
         connection.connect_token_hash = token_hash
         connection.connect_expires_at = expires_at
         connection.updated_at = utc_now()
         session.commit()
 
     username = app.config["TELEGRAM_BOT_USERNAME"]
-    return f"https://t.me/{username}?{urllib.parse.urlencode({'start': raw_token})}", already_connected
+    query = urllib.parse.urlencode({"start": raw_token})
+    return f"https://t.me/{username}?{query}", already_connected
 
 
-def validate_webhook_secret(app: Flask, supplied_secret: str) -> bool:
+def validate_webhook_secret(
+    app: Flask,
+    supplied_secret: str,
+) -> bool:
     configured = app.config.get("TELEGRAM_WEBHOOK_SECRET", "")
-    return bool(configured) and hmac.compare_digest(configured, supplied_secret)
+    return bool(configured) and hmac.compare_digest(
+        configured,
+        supplied_secret,
+    )
 
 
-def process_telegram_update(app: Flask, engine, update: dict[str, Any]) -> None:
+def process_telegram_update(
+    app: Flask,
+    engine,
+    update: dict[str, Any],
+) -> None:
     message = update.get("message")
     if not isinstance(message, dict):
         return
+
     chat = message.get("chat")
     if not isinstance(chat, dict) or chat.get("type") != "private":
         return
+
     chat_id = str(chat.get("id", "")).strip()
     if not chat_id:
         return
 
     text_value = message.get("text")
-    text_message = str(text_value).strip() if text_value is not None else ""
+    text_message = (
+        str(text_value).strip()
+        if text_value is not None
+        else ""
+    )
+
     start_match = TELEGRAM_START_PATTERN.fullmatch(text_message)
     if start_match:
         token = start_match.group(1)
@@ -103,42 +136,68 @@ def process_telegram_update(app: Flask, engine, update: dict[str, Any]) -> None:
             send_telegram_message(
                 app,
                 chat_id,
-                "Open the Connect Telegram button on the UM Job Alerts website, "
-                "then press Start here to link your saved alert preferences.",
+                "Open the Create Telegram alert form on the UM Job "
+                "Alerts website, save your preferences, then press "
+                "Start from the private connection link.",
             )
             return
-        connect_telegram_chat(app, engine, chat, token)
+
+        connect_telegram_chat(
+            app,
+            engine,
+            chat,
+            token,
+        )
         return
 
-    command = text_message.split(maxsplit=1)[0].casefold() if text_message else ""
+    command = (
+        text_message.split(maxsplit=1)[0].casefold()
+        if text_message
+        else ""
+    )
     command = command.split("@", 1)[0]
+
     if command == "/stop":
         stopped = disconnect_telegram_chat(engine, chat_id)
         reply = (
-            "Telegram job alerts are disconnected. Your email alert remains active."
+            "Telegram job alerts are disconnected. You will no "
+            "longer receive job notifications in this chat."
             if stopped
-            else "This Telegram chat is not currently connected to a job alert."
+            else "This Telegram chat is not currently connected "
+            "to a job alert."
         )
         send_telegram_message(app, chat_id, reply)
         return
+
     if command == "/status":
-        send_telegram_message(app, chat_id, telegram_connection_status(engine, chat_id))
+        send_telegram_message(
+            app,
+            chat_id,
+            telegram_connection_status(engine, chat_id),
+        )
         return
 
     send_telegram_message(
         app,
         chat_id,
         "UM Job Alerts bot commands:\n"
-        "/status — check whether this chat is connected\n"
-        "/stop — disconnect Telegram alerts\n\n"
-        "To connect, save your preferences on the website and use its "
-        "Connect Telegram button.",
+        "/status — check whether alerts are active\n"
+        "/stop — stop alerts in this chat\n\n"
+        "To connect, save your preferences on the website and "
+        "use its Connect Telegram button.",
     )
 
 
-def connect_telegram_chat(app: Flask, engine, chat: dict[str, Any], raw_token: str) -> None:
+def connect_telegram_chat(
+    app: Flask,
+    engine,
+    chat: dict[str, Any],
+    raw_token: str,
+) -> None:
     chat_id = str(chat.get("id", ""))
-    token_hash = hashlib.sha256(raw_token.encode("utf-8")).hexdigest()
+    token_hash = hashlib.sha256(
+        raw_token.encode("utf-8")
+    ).hexdigest()
     now = utc_now()
 
     with Session(engine) as session:
@@ -147,13 +206,19 @@ def connect_telegram_chat(app: Flask, engine, chat: dict[str, Any], raw_token: s
                 TelegramConnection.connect_token_hash == token_hash
             )
         )
-        expiry = normalized_expiry(connection.connect_expires_at if connection else None)
+        expiry = normalized_expiry(
+            connection.connect_expires_at
+            if connection
+            else None
+        )
+
         if connection is None or expiry is None or expiry < now:
             send_telegram_message(
                 app,
                 chat_id,
-                "This connection link is invalid or expired. Return to the website, "
-                "save your alert again, and use the new Connect Telegram button.",
+                "This connection link is invalid or expired. "
+                "Return to the website, save your preferences "
+                "again, and use the new Connect Telegram button.",
             )
             return
 
@@ -164,20 +229,43 @@ def connect_telegram_chat(app: Flask, engine, chat: dict[str, Any], raw_token: s
             )
         )
         if existing:
+            old_subscription = session.get(
+                Subscription,
+                existing.subscription_id,
+            )
+            if old_subscription:
+                old_subscription.active = False
+                old_subscription.updated_at = now
+
             existing.chat_id = None
             existing.username = None
             existing.first_name = None
             existing.enabled = False
             existing.updated_at = now
 
+        subscription = session.get(
+            Subscription,
+            connection.subscription_id,
+        )
+        if subscription:
+            subscription.active = True
+            subscription.updated_at = now
+
         connection.chat_id = chat_id
-        connection.username = normalize_optional_text(chat.get("username"), 64)
-        connection.first_name = normalize_optional_text(chat.get("first_name"), 128)
+        connection.username = normalize_optional_text(
+            chat.get("username"),
+            64,
+        )
+        connection.first_name = normalize_optional_text(
+            chat.get("first_name"),
+            128,
+        )
         connection.enabled = True
         connection.connected_at = now
         connection.connect_token_hash = None
         connection.connect_expires_at = None
         connection.updated_at = now
+
         try:
             session.commit()
         except IntegrityError:
@@ -185,17 +273,18 @@ def connect_telegram_chat(app: Flask, engine, chat: dict[str, Any], raw_token: s
             send_telegram_message(
                 app,
                 chat_id,
-                "Telegram could not finish linking this chat. Generate a new link "
-                "from the website and try again.",
+                "Telegram could not finish linking this chat. "
+                "Generate a new link from the website and try again.",
             )
             return
 
     send_telegram_message(
         app,
         chat_id,
-        "✅ Telegram alerts are connected. I’ll send only new University of "
-        "Manitoba jobs matching the roles and keywords you saved.\n\n"
-        "Use /status to check the connection or /stop to disconnect.",
+        "✅ Telegram alerts are connected. I’ll send only new "
+        "University of Manitoba jobs matching the roles and "
+        "keywords you saved.\n\n"
+        "Use /status to check the connection or /stop to stop alerts.",
     )
 
 
@@ -209,6 +298,15 @@ def disconnect_telegram_chat(engine, chat_id: str) -> bool:
         )
         if connection is None:
             return False
+
+        subscription = session.get(
+            Subscription,
+            connection.subscription_id,
+        )
+        if subscription:
+            subscription.active = False
+            subscription.updated_at = utc_now()
+
         connection.chat_id = None
         connection.username = None
         connection.first_name = None
@@ -222,77 +320,124 @@ def telegram_connection_status(engine, chat_id: str) -> str:
     with Session(engine) as session:
         row = session.execute(
             select(TelegramConnection, Subscription)
-            .join(Subscription, Subscription.id == TelegramConnection.subscription_id)
+            .join(
+                Subscription,
+                Subscription.id
+                == TelegramConnection.subscription_id,
+            )
             .where(
                 TelegramConnection.chat_id == chat_id,
                 TelegramConnection.enabled.is_(True),
                 Subscription.active.is_(True),
             )
         ).first()
+
         if row is None:
             return (
-                "This Telegram chat is not connected. Save your alert on the "
-                "website and use its Connect Telegram button."
+                "This Telegram chat is not connected. Save your "
+                "preferences on the website and use its Connect "
+                "Telegram button."
             )
-        _, subscription = row
+
         return (
-            "✅ Telegram alerts are active for "
-            f"{display_masked_email(subscription.email)}. Use /stop to disconnect."
+            "✅ Telegram job alerts are active in this chat. "
+            "Use /stop whenever you want to stop them."
         )
 
 
-def normalize_optional_text(value: Any, limit: int) -> str | None:
+def normalize_optional_text(
+    value: Any,
+    limit: int,
+) -> str | None:
     if value is None:
         return None
     normalized = " ".join(str(value).split())[:limit]
     return normalized or None
 
 
-def telegram_api_call(app: Flask, method: str, payload: dict[str, Any]) -> dict[str, Any]:
-    custom: Callable[[str, dict[str, Any]], dict[str, Any]] | None = app.config.get(
-        "TELEGRAM_API_CALL"
-    )
+def telegram_api_call(
+    app: Flask,
+    method: str,
+    payload: dict[str, Any],
+) -> dict[str, Any]:
+    custom: Callable[
+        [str, dict[str, Any]],
+        dict[str, Any],
+    ] | None = app.config.get("TELEGRAM_API_CALL")
     if custom:
         return custom(method, payload)
 
     token = app.config.get("TELEGRAM_BOT_TOKEN", "")
     if not token:
-        raise TelegramAPIError("TELEGRAM_BOT_TOKEN is not configured.")
-    endpoint = f"https://api.telegram.org/bot{token}/{method}"
+        raise TelegramAPIError(
+            "TELEGRAM_BOT_TOKEN is not configured."
+        )
+
+    endpoint = (
+        f"https://api.telegram.org/bot{token}/{method}"
+    )
     telegram_request = urllib.request.Request(
         endpoint,
         data=json.dumps(payload).encode("utf-8"),
         method="POST",
         headers={"Content-Type": "application/json"},
     )
+
     try:
-        with urllib.request.urlopen(telegram_request, timeout=30) as response:
-            response_payload = json.loads(response.read().decode("utf-8"))
+        with urllib.request.urlopen(
+            telegram_request,
+            timeout=30,
+        ) as response:
+            response_payload = json.loads(
+                response.read().decode("utf-8")
+            )
     except urllib.error.HTTPError as exc:
         try:
-            response_payload = json.loads(exc.read().decode("utf-8"))
+            response_payload = json.loads(
+                exc.read().decode("utf-8")
+            )
         except (json.JSONDecodeError, UnicodeDecodeError):
-            raise TelegramAPIError(f"Telegram returned HTTP {exc.code}.", exc.code) from exc
+            raise TelegramAPIError(
+                f"Telegram returned HTTP {exc.code}.",
+                exc.code,
+            ) from exc
     except (urllib.error.URLError, TimeoutError) as exc:
-        raise TelegramAPIError(f"Telegram request failed: {exc}") from exc
+        raise TelegramAPIError(
+            f"Telegram request failed: {exc}"
+        ) from exc
 
     if not response_payload.get("ok"):
         raise TelegramAPIError(
-            str(response_payload.get("description") or "Telegram API error."),
+            str(
+                response_payload.get("description")
+                or "Telegram API error."
+            ),
             response_payload.get("error_code"),
         )
+
     return response_payload
 
 
-def send_telegram_message(app: Flask, chat_id: str, message: str) -> None:
+def send_telegram_message(
+    app: Flask,
+    chat_id: str,
+    message: str,
+) -> None:
     telegram_api_call(
         app,
         "sendMessage",
-        {"chat_id": chat_id, "text": message, "disable_web_page_preview": True},
+        {
+            "chat_id": chat_id,
+            "text": message,
+            "disable_web_page_preview": True,
+        },
     )
 
 
-def telegram_chunks(message: str, limit: int = 3900) -> Iterable[str]:
+def telegram_chunks(
+    message: str,
+    limit: int = 3900,
+) -> Iterable[str]:
     remaining = message
     while len(remaining) > limit:
         split_at = remaining.rfind("\n\n", 0, limit)
@@ -304,10 +449,15 @@ def telegram_chunks(message: str, limit: int = 3900) -> Iterable[str]:
         yield remaining
 
 
-def format_telegram_alert(jobs: Iterable[dict[str, str]]) -> str:
+def format_telegram_alert(
+    jobs: Iterable[dict[str, str]],
+) -> str:
     jobs_list = list(jobs)
     plural = "s" if len(jobs_list) != 1 else ""
-    blocks = [f"🔔 {len(jobs_list)} new U of M job match{plural}"]
+    blocks = [
+        f"🔔 {len(jobs_list)} new U of M job match{plural}"
+    ]
+
     for job in jobs_list:
         details = [job["title"]]
         if job["id"]:
@@ -316,24 +466,39 @@ def format_telegram_alert(jobs: Iterable[dict[str, str]]) -> str:
             details.append(f"Posted: {job['posting_date']}")
         details.append(job["url"])
         blocks.append("\n".join(details))
+
     return "\n\n".join(blocks)
 
 
-def send_job_telegram(app: Flask, chat_id: str, jobs: list[dict[str, str]]) -> None:
-    for chunk in telegram_chunks(format_telegram_alert(jobs)):
+def send_job_telegram(
+    app: Flask,
+    chat_id: str,
+    jobs: list[dict[str, str]],
+) -> None:
+    for chunk in telegram_chunks(
+        format_telegram_alert(jobs)
+    ):
         send_telegram_message(app, chat_id, chunk)
 
 
-def disable_broken_telegram_connection(engine, connection_id: int) -> None:
+def disable_broken_telegram_connection(
+    engine,
+    connection_id: int,
+) -> None:
     with Session(engine) as session:
-        connection = session.get(TelegramConnection, connection_id)
+        connection = session.get(
+            TelegramConnection,
+            connection_id,
+        )
         if connection:
+            subscription = session.get(
+                Subscription,
+                connection.subscription_id,
+            )
+            if subscription:
+                subscription.active = False
+                subscription.updated_at = utc_now()
+
             connection.enabled = False
             connection.updated_at = utc_now()
             session.commit()
-
-
-def display_masked_email(email: str) -> str:
-    local, _, domain = email.partition("@")
-    masked_local = local[:1] + "*" if len(local) <= 2 else local[0] + "***" + local[-1]
-    return f"{masked_local}@{domain}"
