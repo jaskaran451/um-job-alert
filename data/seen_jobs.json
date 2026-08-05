@@ -1,6 +1,6 @@
 {
   "initialized": true,
-  "last_success_utc": "2026-08-05T20:40:52+00:00",
+  "last_success_utc": "2026-08-05T21:57:42+00:00",
   "seen_jobs": [
     {
       "id": "48954",
@@ -19,6 +19,12 @@
       "posting_date": "Aug/05/2026",
       "title": "System and Data Engineer - IT4 (AESES)",
       "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48944&Language=1"
+    },
+    {
+      "id": "48942",
+      "posting_date": "Aug/05/2026",
+      "title": "Operations Assistant- Office Assistant 5 (AESES)",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48942&Language=1"
     },
     {
       "id": "48941",
@@ -157,12 +163,6 @@
       "posting_date": "Jul/31/2026",
       "title": "Service Desk Analyst - IT2 (AESES)",
       "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48846&Language=1"
-    },
-    {
-      "id": "48838",
-      "posting_date": "Jul/31/2026",
-      "title": "Plant Growth Technician - Tech 2 (AESES)",
-      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48838&Language=1"
     },
     {
       "id": "48816",
