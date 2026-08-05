@@ -1,7 +1,19 @@
 {
   "initialized": true,
-  "last_success_utc": "2026-08-05T18:56:04+00:00",
+  "last_success_utc": "2026-08-05T20:40:52+00:00",
   "seen_jobs": [
+    {
+      "id": "48954",
+      "posting_date": "Aug/05/2026",
+      "title": "Teaching Assistant - ENG 1430 B02",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48954&Language=1"
+    },
+    {
+      "id": "48951",
+      "posting_date": "Aug/05/2026",
+      "title": "Grader/Marker CLAS 1520 (CUPE Student)",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48951&Language=1"
+    },
     {
       "id": "48944",
       "posting_date": "Aug/05/2026",
@@ -15,34 +27,16 @@
       "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48941&Language=1"
     },
     {
-      "id": "48938",
-      "posting_date": "Aug/05/2026",
-      "title": "Grader/Marker CLAS 1280 (CUPE Student)",
-      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48938&Language=1"
-    },
-    {
-      "id": "48936",
-      "posting_date": "Aug/05/2026",
-      "title": "TA (Teaching Assistant) LATN 1080 (CUPE Student)",
-      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48936&Language=1"
-    },
-    {
       "id": "48935",
       "posting_date": "Aug/05/2026",
       "title": "Research & Laboratory Support Specialist - Tech 4 (AESES)",
       "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48935&Language=1"
     },
     {
-      "id": "48933",
+      "id": "48931",
       "posting_date": "Aug/05/2026",
-      "title": "Sessional Instructor - EDUA 5620 (Repost)",
-      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48933&Language=1"
-    },
-    {
-      "id": "48929",
-      "posting_date": "Aug/05/2026",
-      "title": "Sessional Instructor - BIOE 7380",
-      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48929&Language=1"
+      "title": "GMGT 2070 A01 Sessional",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48931&Language=1"
     },
     {
       "id": "48921",
@@ -73,6 +67,12 @@
       "posting_date": "Aug/05/2026",
       "title": "TA/Demo/TUR/Sem. Leaders - AGRI 2400 (CUPE Students)",
       "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48910&Language=1"
+    },
+    {
+      "id": "48909",
+      "posting_date": "Aug/05/2026",
+      "title": "TA/Demo/TUR/Sem. Leaders - AGEC 2370 (CUPE Students)",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48909&Language=1"
     },
     {
       "id": "48908",
