@@ -3,9 +3,7 @@ name: Test web app
 on:
   pull_request:
   push:
-    branches:
-      - main
-      - "feature/**"
+    branches: [main]
 
 permissions:
   contents: read
