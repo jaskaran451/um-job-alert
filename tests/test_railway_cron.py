@@ -7,6 +7,7 @@ from pathlib import Path
 from sqlalchemy import create_engine, select
 from sqlalchemy.orm import Session
 
+from app import load_latest_jobs
 from models import Base, MonitorState, PortalJob
 from railway_cron import (
     import_legacy_state,
@@ -69,6 +70,22 @@ class RailwayCronStateTests(unittest.TestCase):
             row = session.get(PortalJob, "50001")
             self.assertTrue(state.initialized)
             self.assertFalse(row.pending_delivery)
+
+    def test_website_loader_reads_postgresql_snapshot(self):
+        baseline = make_job("50001")
+        persist_scrape(
+            self.engine,
+            [baseline],
+            reference_date=date(2026, 8, 6),
+            max_alert_age_days=14,
+        )
+
+        jobs, last_updated = load_latest_jobs(self.engine)
+
+        self.assertEqual(jobs[0]["id"], "50001")
+        self.assertEqual(jobs[0]["title"], baseline.title)
+        self.assertEqual(jobs[0]["posting_date"], "Aug/06/2026")
+        self.assertIsNotNone(last_updated)
 
     def test_new_recent_job_is_queued_after_baseline(self):
         baseline = make_job("50001")
