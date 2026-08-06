@@ -1,15 +1,8 @@
 {
   "initialized": true,
-  "last_dispatch_utc": "2026-08-06T03:44:55+00:00",
+  "last_dispatch_utc": "2026-08-06T15:00:57+00:00",
   "last_success_utc": "2026-08-06T15:00:54+00:00",
-  "pending_jobs": [
-    {
-      "id": "48961",
-      "posting_date": "Aug/06/2026",
-      "title": "STAT 1000 A01 Sessional Fall",
-      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48961&Language=1"
-    }
-  ],
+  "pending_jobs": [],
   "seen_ids": [
     "48954",
     "48951",
