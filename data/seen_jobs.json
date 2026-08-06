@@ -1,8 +1,15 @@
 {
   "initialized": true,
   "last_dispatch_utc": "2026-08-06T03:44:55+00:00",
-  "last_success_utc": "2026-08-06T12:30:44+00:00",
-  "pending_jobs": [],
+  "last_success_utc": "2026-08-06T15:00:54+00:00",
+  "pending_jobs": [
+    {
+      "id": "48961",
+      "posting_date": "Aug/06/2026",
+      "title": "STAT 1000 A01 Sessional Fall",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48961&Language=1"
+    }
+  ],
   "seen_ids": [
     "48954",
     "48951",
@@ -74,9 +81,16 @@
     "48150",
     "48149",
     "48147",
-    "48145"
+    "48145",
+    "48961"
   ],
   "seen_jobs": [
+    {
+      "id": "48961",
+      "posting_date": "Aug/06/2026",
+      "title": "STAT 1000 A01 Sessional Fall",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48961&Language=1"
+    },
     {
       "id": "48955",
       "posting_date": "Aug/05/2026",
@@ -310,12 +324,6 @@
       "posting_date": "Aug/04/2026",
       "title": "GMGT 1010 A04 SESSIONAL",
       "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48865&Language=1"
-    },
-    {
-      "id": "48864",
-      "posting_date": "Aug/04/2026",
-      "title": "Teaching Assistant - EDUB 4102",
-      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48864&Language=1"
     }
   ],
   "version": 3
