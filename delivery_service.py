@@ -11,7 +11,8 @@ from models import Delivery, Subscription, TelegramConnection
 from telegram_service import (
     TelegramAPIError,
     disable_broken_telegram_connection,
-    send_job_telegram,
+    send_job_batch_telegram,
+    telegram_job_batches,
 )
 
 
@@ -115,6 +116,8 @@ def dispatch_to_subscribers(
         "matching_subscribers": 0,
         "telegram_attempted": 0,
         "telegram_delivered": 0,
+        "telegram_batches_delivered": 0,
+        "telegram_jobs_delivered": 0,
         "failed": [],
     }
 
@@ -146,35 +149,45 @@ def dispatch_to_subscribers(
 
         result["matching_subscribers"] += 1
         result["telegram_attempted"] += 1
+        subscription_succeeded = True
 
-        try:
-            send_job_telegram(
-                app,
-                connection.chat_id,
-                telegram_jobs,
-            )
-            record_deliveries(
-                engine,
-                subscription.id,
-                telegram_jobs,
-                "telegram",
-            )
-            result["telegram_delivered"] += 1
-        except TelegramAPIError as exc:
-            app.logger.exception("Could not deliver Telegram alert")
-            if exc.error_code in {400, 403}:
-                disable_broken_telegram_connection(
-                    engine,
-                    connection.id,
+        for batch in telegram_job_batches(app, telegram_jobs):
+            try:
+                send_job_batch_telegram(
+                    app,
+                    connection.chat_id,
+                    batch,
                 )
-            result["failed"].append(
-                f"telegram subscription {subscription.id}: {exc}"
-            )
-        except Exception as exc:
-            app.logger.exception("Could not deliver Telegram alert")
-            result["failed"].append(
-                f"telegram subscription {subscription.id}: {exc}"
-            )
+                record_deliveries(
+                    engine,
+                    subscription.id,
+                    batch,
+                    "telegram",
+                )
+                result["telegram_batches_delivered"] += 1
+                result["telegram_jobs_delivered"] += len(batch)
+            except TelegramAPIError as exc:
+                subscription_succeeded = False
+                app.logger.exception("Could not deliver Telegram alert")
+                if exc.error_code in {400, 403}:
+                    disable_broken_telegram_connection(
+                        engine,
+                        connection.id,
+                    )
+                result["failed"].append(
+                    f"telegram subscription {subscription.id}: {exc}"
+                )
+                break
+            except Exception as exc:
+                subscription_succeeded = False
+                app.logger.exception("Could not deliver Telegram alert")
+                result["failed"].append(
+                    f"telegram subscription {subscription.id}: {exc}"
+                )
+                break
+
+        if subscription_succeeded:
+            result["telegram_delivered"] += 1
 
     return result
 
@@ -187,16 +200,17 @@ def record_deliveries(
 ) -> None:
     with Session(engine) as session:
         for job in jobs:
-            if job["id"]:
-                session.add(
-                    Delivery(
-                        subscription_id=subscription_id,
-                        job_id=job["id"],
-                        channel=channel,
-                    )
-                )
+            if not job["id"]:
+                continue
 
-        try:
-            session.commit()
-        except IntegrityError:
-            session.rollback()
+            session.add(
+                Delivery(
+                    subscription_id=subscription_id,
+                    job_id=job["id"],
+                    channel=channel,
+                )
+            )
+            try:
+                session.commit()
+            except IntegrityError:
+                session.rollback()

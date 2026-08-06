@@ -9,7 +9,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 from datetime import datetime, timedelta, timezone
-from typing import Any, Callable, Iterable
+from typing import Any, Callable, Iterable, Iterator
 
 from flask import Flask
 from sqlalchemy import select
@@ -434,29 +434,13 @@ def send_telegram_message(
     )
 
 
-def telegram_chunks(
-    message: str,
-    limit: int = 3900,
-) -> Iterable[str]:
-    remaining = message
-    while len(remaining) > limit:
-        split_at = remaining.rfind("\n\n", 0, limit)
-        if split_at < limit // 2:
-            split_at = limit
-        yield remaining[:split_at]
-        remaining = remaining[split_at:].lstrip()
-    if remaining:
-        yield remaining
-
-
 def format_telegram_alert(
     jobs: Iterable[dict[str, str]],
 ) -> str:
     jobs_list = list(jobs)
-    plural = "s" if len(jobs_list) != 1 else ""
-    blocks = [
-        f"🔔 {len(jobs_list)} new U of M job match{plural}"
-    ]
+    count = len(jobs_list)
+    label = "job match" if count == 1 else "job matches"
+    blocks = [f"🔔 {count} new U of M {label}"]
 
     for job in jobs_list:
         details = [job["title"]]
@@ -470,15 +454,53 @@ def format_telegram_alert(
     return "\n\n".join(blocks)
 
 
+def telegram_job_batches(
+    app: Flask,
+    jobs: Iterable[dict[str, str]],
+) -> Iterator[list[dict[str, str]]]:
+    max_jobs = max(
+        1,
+        min(int(app.config.get("TELEGRAM_JOBS_PER_MESSAGE", 8)), 20),
+    )
+    message_limit = max(
+        1000,
+        min(int(app.config.get("TELEGRAM_MESSAGE_LIMIT", 3800)), 4000),
+    )
+    current: list[dict[str, str]] = []
+
+    for job in jobs:
+        candidate = [*current, job]
+        too_many = len(candidate) > max_jobs
+        too_long = len(format_telegram_alert(candidate)) > message_limit
+
+        if current and (too_many or too_long):
+            yield current
+            current = [job]
+        else:
+            current = candidate
+
+    if current:
+        yield current
+
+
+def send_job_batch_telegram(
+    app: Flask,
+    chat_id: str,
+    jobs: list[dict[str, str]],
+) -> None:
+    message = format_telegram_alert(jobs)
+    if len(message) > 4096:
+        raise ValueError("Telegram alert batch exceeds the message limit.")
+    send_telegram_message(app, chat_id, message)
+
+
 def send_job_telegram(
     app: Flask,
     chat_id: str,
     jobs: list[dict[str, str]],
 ) -> None:
-    for chunk in telegram_chunks(
-        format_telegram_alert(jobs)
-    ):
-        send_telegram_message(app, chat_id, chunk)
+    for batch in telegram_job_batches(app, jobs):
+        send_job_batch_telegram(app, chat_id, batch)
 
 
 def disable_broken_telegram_connection(

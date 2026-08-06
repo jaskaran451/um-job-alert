@@ -8,11 +8,17 @@ from pathlib import Path
 from typing import Any
 
 from flask import Flask, jsonify, render_template, request
-from sqlalchemy import create_engine, text
+from sqlalchemy import create_engine, select, text
 from sqlalchemy.orm import Session
 
 from delivery_service import dispatch_to_subscribers
-from models import Base, Subscription, normalize_database_url, utc_now
+from models import (
+    Base,
+    Subscription,
+    TelegramConnection,
+    normalize_database_url,
+    utc_now,
+)
 from telegram_service import (
     TelegramAPIError,
     issue_telegram_connect_link,
@@ -38,6 +44,7 @@ def create_app(test_config: dict[str, Any] | None = None) -> Flask:
     app = Flask(__name__)
     app.config.update(
         SECRET_KEY=os.getenv("APP_SECRET_KEY", "development-only-change-me"),
+        MAX_CONTENT_LENGTH=16 * 1024,
         DATABASE_URL=normalize_database_url(
             os.getenv(
                 "DATABASE_URL",
@@ -55,6 +62,12 @@ def create_app(test_config: dict[str, Any] | None = None) -> Flask:
         ).strip(),
         TELEGRAM_CONNECT_TTL_MINUTES=int(
             os.getenv("TELEGRAM_CONNECT_TTL_MINUTES", "30")
+        ),
+        TELEGRAM_JOBS_PER_MESSAGE=int(
+            os.getenv("TELEGRAM_JOBS_PER_MESSAGE", "8")
+        ),
+        TELEGRAM_MESSAGE_LIMIT=int(
+            os.getenv("TELEGRAM_MESSAGE_LIMIT", "3800")
         ),
     )
     if test_config:
@@ -80,6 +93,17 @@ def create_app(test_config: dict[str, Any] | None = None) -> Flask:
     )
     Base.metadata.create_all(engine)
     app.extensions["database_engine"] = engine
+
+    @app.after_request
+    def add_security_headers(response):
+        response.headers.setdefault("X-Content-Type-Options", "nosniff")
+        response.headers.setdefault("X-Frame-Options", "DENY")
+        response.headers.setdefault("Referrer-Policy", "same-origin")
+        response.headers.setdefault(
+            "Permissions-Policy",
+            "camera=(), microphone=(), geolocation=()",
+        )
+        return response
 
     @app.get("/")
     def index():
@@ -109,6 +133,9 @@ def create_app(test_config: dict[str, Any] | None = None) -> Flask:
 
     @app.post("/api/subscriptions")
     def create_subscription():
+        if not request.is_json:
+            return jsonify(message="JSON request body required."), 415
+
         payload = request.get_json(silent=True) or {}
         if payload.get("company"):
             return jsonify(message="Preferences saved."), 201
@@ -139,6 +166,8 @@ def create_app(test_config: dict[str, Any] | None = None) -> Flask:
                 )
             ), 503
 
+        purge_expired_unconnected_subscriptions(engine)
+
         internal_identifier = (
             f"telegram-{secrets.token_urlsafe(18).lower()}@alerts.invalid"
         )
@@ -147,7 +176,7 @@ def create_app(test_config: dict[str, Any] | None = None) -> Flask:
                 email=internal_identifier,
                 role_types_json=json.dumps(role_types),
                 keywords_json=json.dumps(keywords),
-                active=True,
+                active=False,
                 updated_at=utc_now(),
             )
             session.add(subscription)
@@ -185,6 +214,9 @@ def create_app(test_config: dict[str, Any] | None = None) -> Flask:
         ):
             return jsonify(message="Unauthorized."), 401
 
+        if not request.is_json:
+            return jsonify(message="JSON request body required."), 415
+
         jobs = sanitize_jobs(
             (request.get_json(silent=True) or {}).get("jobs")
         )
@@ -208,6 +240,9 @@ def create_app(test_config: dict[str, Any] | None = None) -> Flask:
         if not validate_webhook_secret(app, supplied_secret):
             return jsonify(ok=False), 401
 
+        if not request.is_json:
+            return jsonify(ok=False), 415
+
         try:
             process_telegram_update(
                 app,
@@ -223,6 +258,38 @@ def create_app(test_config: dict[str, Any] | None = None) -> Flask:
         return jsonify(ok=True)
 
     return app
+
+
+def purge_expired_unconnected_subscriptions(engine) -> int:
+    now = utc_now()
+    removed = 0
+
+    with Session(engine) as session:
+        expired_connections = list(
+            session.scalars(
+                select(TelegramConnection).where(
+                    TelegramConnection.enabled.is_(False),
+                    TelegramConnection.chat_id.is_(None),
+                    TelegramConnection.connect_expires_at.is_not(None),
+                    TelegramConnection.connect_expires_at < now,
+                )
+            )
+        )
+
+        for connection in expired_connections:
+            subscription = session.get(
+                Subscription,
+                connection.subscription_id,
+            )
+            session.delete(connection)
+            if subscription is not None and not subscription.active:
+                session.delete(subscription)
+            removed += 1
+
+        if removed:
+            session.commit()
+
+    return removed
 
 
 def sanitize_role_types(value: Any) -> list[str]:
