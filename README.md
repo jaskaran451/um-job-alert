@@ -50,6 +50,7 @@ PostgreSQL when Telegram delivery is incomplete, allowing the next run to retry
 without repeating already completed per-user batches.
 
 GitHub Actions is retained only as a manually triggered emergency fallback.
+Detailed setup instructions are in `RAILWAY_DEPLOYMENT.md`.
 
 ## Project structure
 
