@@ -7,7 +7,7 @@ import json
 import os
 import sys
 
-from sqlalchemy import func, inspect, select, text
+from sqlalchemy import func, inspect, or_, select, text, update
 from sqlalchemy.orm import Session
 
 
@@ -45,6 +45,18 @@ def main() -> int:
         return 1
 
     with Session(engine) as session:
+        cleanup_result = session.execute(
+            update(TelegramConnection)
+            .where(
+                or_(
+                    TelegramConnection.username.is_not(None),
+                    TelegramConnection.first_name.is_not(None),
+                )
+            )
+            .values(username=None, first_name=None)
+        )
+        session.commit()
+
         subscriber_count = session.scalar(
             select(func.count()).select_from(Subscription)
         )
@@ -62,6 +74,9 @@ def main() -> int:
                 "tables": sorted(required_tables),
                 "subscriber_count": int(subscriber_count or 0),
                 "telegram_connections": int(telegram_count or 0),
+                "telegram_profile_fields_cleared": int(
+                    cleanup_result.rowcount or 0
+                ),
             },
             sort_keys=True,
         )
