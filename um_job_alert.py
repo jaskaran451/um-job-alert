@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Monitor public University of Manitoba job postings and send new-job alerts."""
+"""Monitor the public University of Manitoba recruitment portal."""
 
 from __future__ import annotations
 
@@ -8,14 +8,14 @@ import json
 import logging
 import os
 import re
-import sys
 import tempfile
 import urllib.parse
 
 from dataclasses import asdict, dataclass
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 from pathlib import Path
 from typing import Sequence
+from zoneinfo import ZoneInfo
 
 from playwright.sync_api import Error as PlaywrightError
 from playwright.sync_api import Page, TimeoutError as PlaywrightTimeoutError
@@ -25,27 +25,14 @@ from playwright.sync_api import sync_playwright
 LOGGER = logging.getLogger("um_job_alert")
 
 DEFAULT_SOURCE_URLS = (
-    "https://viprecprod.ad.umanitoba.ca/A",
-    "https://viprecprod.ad.umanitoba.ca/B",
-    "https://viprecprod.ad.umanitoba.ca/P",
-    "https://viprecprod.ad.umanitoba.ca/S",
-    "https://viprecprod.ad.umanitoba.ca/T",
+    "https://viprecprod.ad.umanitoba.ca/default",
 )
-
-MAX_PAGES_PER_SOURCE = 4
+MAX_PAGES_PER_SOURCE = 5
 LATEST_JOBS_LIMIT = 40
-
-SOURCE_NAMES = {
-    "A": "Academic and research",
-    "B": "Sessional and student academic",
-    "P": "Professional and management",
-    "S": "Support staff",
-    "T": "Trades and services",
-}
-
-# These defaults focus on opportunities most likely to be useful to a
-# Computer Engineering student. Set ALERT_ALL=true to receive every posting.
-
+MAX_SEEN_IDS = 5_000
+DEFAULT_MAX_ALERT_AGE_DAYS = 14
+LOCAL_TIMEZONE = ZoneInfo("America/Winnipeg")
+SOURCE_NAME = "University of Manitoba recruitment portal"
 
 REQUISITION_PATTERN = re.compile(
     r"Requisition\s+No:\s*(?P<id>\d+)\s*-\s*Category:\s*(?P<category>.+)",
@@ -82,6 +69,10 @@ def utc_now() -> str:
     return datetime.now(timezone.utc).replace(microsecond=0).isoformat()
 
 
+def local_today() -> date:
+    return datetime.now(LOCAL_TIMEZONE).date()
+
+
 def csv_env(name: str, default: Sequence[str] = ()) -> tuple[str, ...]:
     raw = os.getenv(name)
     if raw is None or not raw.strip():
@@ -93,9 +84,8 @@ def normalize_space(value: str) -> str:
     return " ".join(value.split())
 
 
-def source_name(url: str) -> str:
-    path_code = urllib.parse.urlparse(url).path.rstrip("/").rsplit("/", 1)[-1].upper()
-    return SOURCE_NAMES.get(path_code, path_code or "UM Careers")
+def source_name(_url: str) -> str:
+    return SOURCE_NAME
 
 
 def detail_url(requisition_id: str) -> str:
@@ -104,7 +94,7 @@ def detail_url(requisition_id: str) -> str:
 
 
 def parse_job_cells(cells: Sequence[str], source_url: str) -> Job | None:
-    """Parse the visible text from one UM Careers result row."""
+    """Parse the visible text from one recruitment-portal result row."""
     if len(cells) < 4:
         return None
 
@@ -153,6 +143,20 @@ def extract_jobs(page: Page, source_url: str) -> list[Job]:
 
     return jobs
 
+
+def find_page_link(page: Page, page_number: int):
+    """Locate a numbered paginator link on the recruitment portal."""
+    exact_page = re.compile(rf"^\s*{page_number}\s*$")
+    candidates = (
+        page.locator("a[id^='bdy_21_']", has_text=exact_page),
+        page.locator("a", has_text=exact_page),
+    )
+    for candidate in candidates:
+        if candidate.count() > 0:
+            return candidate.first
+    return None
+
+
 def scrape_source(context, source_url: str, timeout_ms: int) -> list[Job]:
     last_error: Exception | None = None
 
@@ -161,13 +165,11 @@ def scrape_source(context, source_url: str, timeout_ms: int) -> list[Job]:
 
         try:
             LOGGER.info("Checking %s (attempt %d/2)", source_url, attempt)
-
             page.goto(
                 source_url,
                 wait_until="domcontentloaded",
                 timeout=timeout_ms,
             )
-
             page.wait_for_selector(
                 "table tbody tr[recno]",
                 state="attached",
@@ -178,41 +180,26 @@ def scrape_source(context, source_url: str, timeout_ms: int) -> list[Job]:
 
             for page_number in range(1, MAX_PAGES_PER_SOURCE + 1):
                 page_jobs = extract_jobs(page, source_url)
-
                 for job in page_jobs:
                     jobs_by_id[job.requisition_id] = job
 
                 next_page_number = page_number + 1
-
                 if next_page_number > MAX_PAGES_PER_SOURCE:
                     break
 
-                next_button = page.locator(
-                    "a[id^='bdy_21_']",
-                    has_text=re.compile(
-                        rf"^\s*{next_page_number}\s*$"
-                    ),
-                )
-
-                if next_button.count() == 0:
+                next_button = find_page_link(page, next_page_number)
+                if next_button is None:
                     break
 
                 previous_first_id = page_jobs[0].requisition_id
-
-                next_button.first.click()
-
+                next_button.click()
                 page.wait_for_function(
                     """
                     previousId => {
-                        const firstRow =
-                            document.querySelector(
-                                "table tbody tr[recno]"
-                            );
-
-                        if (!firstRow) {
-                            return false;
-                        }
-
+                        const firstRow = document.querySelector(
+                            "table tbody tr[recno]"
+                        );
+                        if (!firstRow) return false;
                         return !firstRow.innerText.includes(
                             `Requisition No: ${previousId}`
                         );
@@ -224,20 +211,14 @@ def scrape_source(context, source_url: str, timeout_ms: int) -> list[Job]:
 
             return list(jobs_by_id.values())
 
-        except (
-            PlaywrightTimeoutError,
-            PlaywrightError,
-            RuntimeError,
-        ) as exc:
+        except (PlaywrightTimeoutError, PlaywrightError, RuntimeError) as exc:
             last_error = exc
-
             LOGGER.warning(
                 "Attempt %d failed for %s: %s",
                 attempt,
                 source_url,
                 exc,
             )
-
         finally:
             page.close()
 
@@ -248,10 +229,7 @@ def scrape_source(context, source_url: str, timeout_ms: int) -> list[Job]:
 
 def posting_sort_key(job: Job) -> tuple[datetime, int]:
     try:
-        posting_date = datetime.strptime(
-            job.posting_date,
-            "%b/%d/%Y",
-        )
+        posting_date = datetime.strptime(job.posting_date, "%b/%d/%Y")
     except ValueError:
         posting_date = datetime.min
 
@@ -272,16 +250,9 @@ def scrape_jobs(
     with sync_playwright() as playwright:
         launch_options = {
             "headless": True,
-            "args": [
-                "--disable-dev-shm-usage",
-                "--no-sandbox",
-            ],
+            "args": ["--disable-dev-shm-usage", "--no-sandbox"],
         }
-
-        browser_channel = os.getenv(
-            "BROWSER_CHANNEL",
-            "chrome",
-        ).strip()
+        browser_channel = os.getenv("BROWSER_CHANNEL", "chrome").strip()
 
         try:
             browser = playwright.chromium.launch(
@@ -290,84 +261,73 @@ def scrape_jobs(
             )
         except PlaywrightError as exc:
             LOGGER.warning(
-                "Chrome channel %r was unavailable (%s); "
-                "trying Playwright Chromium.",
+                "Chrome channel %r was unavailable (%s); trying Playwright Chromium.",
                 browser_channel,
                 exc,
             )
-
-            browser = playwright.chromium.launch(
-                **launch_options
-            )
+            browser = playwright.chromium.launch(**launch_options)
 
         context = browser.new_context(
             locale="en-CA",
             timezone_id="America/Winnipeg",
-            viewport={
-                "width": 1440,
-                "height": 1000,
-            },
+            viewport={"width": 1440, "height": 1000},
         )
 
         try:
             for source_url in source_urls:
-                source_jobs = scrape_source(
-                    context,
-                    source_url,
-                    timeout_ms,
-                )
-
-                for job in source_jobs:
+                for job in scrape_source(context, source_url, timeout_ms):
                     jobs_by_id[job.requisition_id] = job
         finally:
             context.close()
             browser.close()
 
-    sorted_jobs = sorted(
+    return sorted(
         jobs_by_id.values(),
         key=posting_sort_key,
         reverse=True,
     )
 
-    return sorted_jobs[:LATEST_JOBS_LIMIT]
+
+def default_state() -> dict:
+    return {
+        "version": 3,
+        "initialized": False,
+        "seen_ids": [],
+        "seen_jobs": [],
+        "pending_jobs": [],
+    }
 
 
 def load_state(path: Path) -> dict:
     if not path.exists():
-        return {
-            "version": 2,
-            "initialized": False,
-            "seen_jobs": [],
-        }
+        return default_state()
 
     try:
-        state = json.loads(
-            path.read_text(encoding="utf-8")
-        )
+        state = json.loads(path.read_text(encoding="utf-8"))
     except (json.JSONDecodeError, OSError) as exc:
-        raise RuntimeError(
-            f"Could not read state file {path}: {exc}"
-        ) from exc
+        raise RuntimeError(f"Could not read state file {path}: {exc}") from exc
 
-    if (
-        "seen_jobs" in state
-        and not isinstance(state["seen_jobs"], list)
-    ):
-        raise RuntimeError(
-            f"State file {path} has an invalid "
-            "seen_jobs field."
-        )
+    if not isinstance(state, dict):
+        raise RuntimeError(f"State file {path} must contain a JSON object.")
 
-    if (
-        "seen_ids" in state
-        and not isinstance(state["seen_ids"], list)
-    ):
-        raise RuntimeError(
-            f"State file {path} has an invalid "
-            "seen_ids field."
-        )
+    for field in ("seen_ids", "seen_jobs", "pending_jobs"):
+        if field in state and not isinstance(state[field], list):
+            raise RuntimeError(f"State file {path} has an invalid {field} field.")
 
+    state.setdefault("initialized", False)
+    state.setdefault("seen_jobs", [])
+    state.setdefault("pending_jobs", [])
+
+    seen_ids = [str(item) for item in state.get("seen_ids", []) if str(item)]
+    for collection in (state["seen_jobs"], state["pending_jobs"]):
+        for item in collection:
+            if isinstance(item, dict) and item.get("id"):
+                seen_ids.append(str(item["id"]))
+
+    state["seen_ids"] = deduplicate_ids(seen_ids)[-MAX_SEEN_IDS:]
+    state["version"] = 3
     return state
+
 
 def save_state(path: Path, state: dict) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -386,127 +346,195 @@ def save_state(path: Path, state: dict) -> None:
     temporary_path.replace(path)
 
 
+def deduplicate_ids(values: Sequence[str]) -> list[str]:
+    result: list[str] = []
+    seen: set[str] = set()
+    for value in values:
+        normalized = str(value).strip()
+        if normalized and normalized not in seen:
+            seen.add(normalized)
+            result.append(normalized)
+    return result
+
+
+def job_record(job: Job) -> dict[str, str]:
+    return {
+        "id": job.requisition_id,
+        "title": job.title,
+        "posting_date": job.posting_date,
+        "url": job.detail_url,
+    }
+
+
+def posting_age_days(job: Job, reference_date: date) -> int | None:
+    try:
+        posted = datetime.strptime(job.posting_date, "%b/%d/%Y").date()
+    except ValueError:
+        return None
+    return (reference_date - posted).days
+
+
+def is_recent_enough_for_alert(
+    job: Job,
+    reference_date: date,
+    max_age_days: int,
+) -> bool:
+    age = posting_age_days(job, reference_date)
+    return age is None or age <= max_age_days
+
+
+def build_next_state(
+    state: dict,
+    jobs: Sequence[Job],
+    *,
+    reference_date: date,
+    max_alert_age_days: int,
+    success_time: str,
+) -> tuple[dict, list[Job], list[Job], list[Job]]:
+    """Return updated state and unseen/fresh/suppressed job groups."""
+    normalized = dict(state)
+    normalized.setdefault("seen_jobs", [])
+    normalized.setdefault("pending_jobs", [])
+    normalized.setdefault("seen_ids", [])
+
+    known_ids = set(str(item) for item in normalized["seen_ids"])
+    for collection in (normalized["seen_jobs"], normalized["pending_jobs"]):
+        known_ids.update(
+            str(item["id"])
+            for item in collection
+            if isinstance(item, dict) and item.get("id")
+        )
+
+    first_run = not normalized.get("initialized", False)
+    unseen_jobs = [] if first_run else [
+        job for job in jobs if job.requisition_id not in known_ids
+    ]
+    fresh_jobs = [
+        job
+        for job in unseen_jobs
+        if is_recent_enough_for_alert(
+            job,
+            reference_date,
+            max_alert_age_days,
+        )
+    ]
+    fresh_ids = {job.requisition_id for job in fresh_jobs}
+    suppressed_jobs = [
+        job for job in unseen_jobs if job.requisition_id not in fresh_ids
+    ]
+
+    pending_by_id: dict[str, dict[str, str]] = {}
+    for item in normalized["pending_jobs"]:
+        if isinstance(item, dict) and item.get("id"):
+            pending_by_id[str(item["id"])] = {
+                "id": str(item["id"]),
+                "title": str(item.get("title", "")),
+                "posting_date": str(item.get("posting_date", "")),
+                "url": str(item.get("url", "")),
+            }
+    for job in fresh_jobs:
+        pending_by_id[job.requisition_id] = job_record(job)
+
+    seen_ids = deduplicate_ids(
+        [
+            *[str(item) for item in normalized["seen_ids"]],
+            *[
+                str(item["id"])
+                for item in normalized["seen_jobs"]
+                if isinstance(item, dict) and item.get("id")
+            ],
+            *[job.requisition_id for job in jobs],
+        ]
+    )[-MAX_SEEN_IDS:]
+
+    next_state = {
+        "version": 3,
+        "initialized": True,
+        "last_success_utc": success_time,
+        "seen_ids": seen_ids,
+        "seen_jobs": [job_record(job) for job in jobs[:LATEST_JOBS_LIMIT]],
+        "pending_jobs": list(pending_by_id.values()),
+    }
+    if normalized.get("last_dispatch_utc"):
+        next_state["last_dispatch_utc"] = normalized["last_dispatch_utc"]
+
+    return next_state, unseen_jobs, fresh_jobs, suppressed_jobs
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--state-file",
         type=Path,
         default=Path(os.getenv("STATE_FILE", "data/seen_jobs.json")),
-        help="JSON file used to remember previously seen requisition IDs.",
+        help="JSON file used to remember posting and delivery state.",
     )
     parser.add_argument(
         "--dry-run",
         action="store_true",
-        help="Print current matches without sending alerts or changing state.",
+        help="Print fresh unseen jobs without changing state.",
     )
     return parser
 
+
 def main(argv: Sequence[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
-
-    source_urls = csv_env(
-        "UM_JOB_URLS",
-        DEFAULT_SOURCE_URLS,
+    source_urls = csv_env("UM_JOB_URLS", DEFAULT_SOURCE_URLS)
+    timeout_ms = int(os.getenv("PAGE_TIMEOUT_MS", "120000"))
+    max_alert_age_days = int(
+        os.getenv("MAX_ALERT_AGE_DAYS", str(DEFAULT_MAX_ALERT_AGE_DAYS))
     )
 
-    timeout_ms = int(
-        os.getenv("PAGE_TIMEOUT_MS", "120000")
-    )
-
-    jobs = scrape_jobs(
-        source_urls,
-        timeout_ms=timeout_ms,
-    )
-
+    jobs = scrape_jobs(source_urls, timeout_ms=timeout_ms)
     if not jobs:
-        raise RuntimeError(
-            "The monitor received no jobs from "
-            "any configured source."
-        )
+        raise RuntimeError("The monitor received no jobs from the recruitment portal.")
 
     state = load_state(args.state_file)
-
-    stored_jobs = state.get("seen_jobs")
-    migrating_old_state = not isinstance(
-        stored_jobs,
-        list,
+    next_state, unseen_jobs, fresh_jobs, suppressed_jobs = build_next_state(
+        state,
+        jobs,
+        reference_date=local_today(),
+        max_alert_age_days=max_alert_age_days,
+        success_time=utc_now(),
     )
-
-    if migrating_old_state:
-        stored_jobs = []
-
-    seen_ids = {
-        str(item.get("id"))
-        for item in stored_jobs
-        if isinstance(item, dict) and item.get("id")
-    }
-
-    first_run = (
-        not state.get("initialized", False)
-        or migrating_old_state
-    )
-
-    if first_run:
-        new_jobs: list[Job] = []
-    else:
-        new_jobs = [
-            job
-            for job in jobs
-            if job.requisition_id not in seen_ids
-        ]
 
     LOGGER.info(
-        "Saved the latest %d jobs; found %d new jobs.",
+        "Read %d jobs from /default; %d unseen, %d fresh for alert, "
+        "%d suppressed as old, %d pending delivery.",
         len(jobs),
-        len(new_jobs),
+        len(unseen_jobs),
+        len(fresh_jobs),
+        len(suppressed_jobs),
+        len(next_state["pending_jobs"]),
     )
-
-    for job in new_jobs:
+    for job in fresh_jobs:
         LOGGER.info(
             "NEW %s | %s | %s",
             job.requisition_id,
             job.title,
             job.detail_url,
         )
+    for job in suppressed_jobs:
+        LOGGER.warning(
+            "SUPPRESSED OLD %s | %s | posted %s",
+            job.requisition_id,
+            job.title,
+            job.posting_date,
+        )
 
     if args.dry_run:
-        print(
-            json.dumps(
-                [asdict(job) for job in new_jobs],
-                indent=2,
-            )
-        )
+        print(json.dumps([asdict(job) for job in fresh_jobs], indent=2))
         return 0
 
-    new_state = {
-        "version": 2,
-        "initialized": True,
-        "last_success_utc": utc_now(),
-        "seen_jobs": [
-            {
-                "id": job.requisition_id,
-                "title": job.title,
-                "posting_date": job.posting_date,
-                "url": job.detail_url,
-            }
-            for job in jobs
-        ],
-    }
+    save_state(args.state_file, next_state)
 
-    save_state(
-        args.state_file,
-        new_state,
-    )
-
-    if first_run:
+    if not state.get("initialized", False):
         LOGGER.info(
-            "The latest %d jobs were saved as the "
-            "new baseline. No existing-job alerts "
-            "were sent.",
-            len(jobs),
+            "Saved the current portal as the initial baseline; no existing jobs were queued."
         )
 
     return 0
+
 
 if __name__ == "__main__":
     logging.basicConfig(
