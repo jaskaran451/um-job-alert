@@ -23,7 +23,13 @@ def main() -> int:
     # Import the Flask application for its configured SQLAlchemy engine.
     # Database models live in models.py, not app.py.
     from app import app
-    from models import Delivery, Subscription, TelegramConnection
+    from models import (
+        Delivery,
+        MonitorState,
+        PortalJob,
+        Subscription,
+        TelegramConnection,
+    )
 
     engine = app.extensions["database_engine"]
 
@@ -35,6 +41,8 @@ def main() -> int:
         Subscription.__tablename__,
         TelegramConnection.__tablename__,
         Delivery.__tablename__,
+        PortalJob.__tablename__,
+        MonitorState.__tablename__,
     }
     missing_tables = sorted(required_tables - tables)
     if missing_tables:
@@ -65,6 +73,14 @@ def main() -> int:
             .select_from(TelegramConnection)
             .where(TelegramConnection.enabled.is_(True))
         )
+        portal_job_count = session.scalar(
+            select(func.count()).select_from(PortalJob)
+        )
+        pending_job_count = session.scalar(
+            select(func.count())
+            .select_from(PortalJob)
+            .where(PortalJob.pending_delivery.is_(True))
+        )
 
     print(
         json.dumps(
@@ -74,6 +90,8 @@ def main() -> int:
                 "tables": sorted(required_tables),
                 "subscriber_count": int(subscriber_count or 0),
                 "telegram_connections": int(telegram_count or 0),
+                "portal_jobs": int(portal_job_count or 0),
+                "pending_portal_jobs": int(pending_job_count or 0),
                 "telegram_profile_fields_cleared": int(
                     cleanup_result.rowcount or 0
                 ),
