@@ -6,6 +6,7 @@ from __future__ import annotations
 import json
 import logging
 import os
+import time
 from datetime import date, datetime, timezone
 from pathlib import Path
 from typing import Any, Callable, Sequence
@@ -275,19 +276,29 @@ def run_once(
     scrape_func: Callable[..., list[Job]] = scrape_jobs,
     dispatch_func: Callable[..., dict[str, Any]] = dispatch_to_subscribers,
 ) -> dict[str, Any]:
+    started = time.monotonic()
     engine = app.extensions["database_engine"]
+    LOGGER.info("CRON START | database=%s", engine.url.get_backend_name())
+
     imported = import_legacy_state(engine)
     if imported:
         LOGGER.info("Imported %d legacy seen requisitions into PostgreSQL.", imported)
 
     os.environ.setdefault("BROWSER_CHANNEL", "")
     source_urls = csv_env("UM_JOB_URLS", DEFAULT_SOURCE_URLS)
-    timeout_ms = int(os.getenv("PAGE_TIMEOUT_MS", "120000"))
+    timeout_ms = int(os.getenv("PAGE_TIMEOUT_MS", "45000"))
     max_alert_age_days = int(
         os.getenv("MAX_ALERT_AGE_DAYS", str(DEFAULT_MAX_ALERT_AGE_DAYS))
     )
 
+    scrape_started = time.monotonic()
+    LOGGER.info("SCRAPE START | sources=%s | timeout_ms=%d", source_urls, timeout_ms)
     jobs = scrape_func(source_urls, timeout_ms=timeout_ms)
+    LOGGER.info(
+        "SCRAPE COMPLETE | jobs=%d | elapsed=%.1fs",
+        len(jobs),
+        time.monotonic() - scrape_started,
+    )
     if not jobs:
         raise RuntimeError("The monitor received no jobs from the recruitment portal.")
 
@@ -298,8 +309,7 @@ def run_once(
         max_alert_age_days=max_alert_age_days,
     )
     LOGGER.info(
-        "Read %d jobs from /default; %d unseen, %d fresh for alert, "
-        "%d suppressed as old.",
+        "STATE SAVED | total=%d unseen=%d fresh=%d suppressed_old=%d",
         len(jobs),
         len(unseen),
         len(fresh),
@@ -316,8 +326,9 @@ def run_once(
         )
 
     pending = load_pending_jobs(engine)
+    LOGGER.info("DISPATCH START | pending_jobs=%d", len(pending))
     if not pending:
-        LOGGER.info("No pending Telegram jobs to dispatch.")
+        LOGGER.info("CRON COMPLETE | no pending jobs | elapsed=%.1fs", time.monotonic() - started)
         return {
             "received_jobs": 0,
             "matching_subscribers": 0,
@@ -331,8 +342,13 @@ def run_once(
             f"TELEGRAM_BOT_TOKEN is missing; keeping {len(pending)} jobs pending."
         )
 
+    dispatch_started = time.monotonic()
     result = dispatch_func(app, engine, pending)
-    LOGGER.info("Telegram dispatch result: %s", json.dumps(result, sort_keys=True))
+    LOGGER.info(
+        "DISPATCH COMPLETE | elapsed=%.1fs | result=%s",
+        time.monotonic() - dispatch_started,
+        json.dumps(result, sort_keys=True),
+    )
     if result.get("failed"):
         raise RuntimeError(
             f"Telegram dispatch was incomplete; keeping {len(pending)} jobs pending."
@@ -342,7 +358,11 @@ def run_once(
         engine,
         [job["id"] for job in pending if job.get("id")],
     )
-    LOGGER.info("Marked %d pending jobs as delivered.", len(pending))
+    LOGGER.info(
+        "CRON COMPLETE | delivered_pending=%d | elapsed=%.1fs",
+        len(pending),
+        time.monotonic() - started,
+    )
     return result
 
 
