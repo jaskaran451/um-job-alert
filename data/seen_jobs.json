@@ -1,7 +1,7 @@
 {
   "initialized": true,
   "last_dispatch_utc": "2026-08-06T15:00:57+00:00",
-  "last_success_utc": "2026-08-07T16:10:23+00:00",
+  "last_success_utc": "2026-08-07T17:10:57+00:00",
   "pending_jobs": [
     {
       "id": "49007",
@@ -242,6 +242,12 @@
       "posting_date": "Aug/07/2026",
       "title": "Tutor FAAH 2090",
       "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=49036&Language=1"
+    },
+    {
+      "id": "49047",
+      "posting_date": "Aug/07/2026",
+      "title": "TA/Demo/TUR/Sem. Leaders - RLGN 2020 (CUPE Students)",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=49047&Language=1"
     }
   ],
   "seen_ids": [
@@ -356,9 +362,16 @@
     "49039",
     "49038",
     "49037",
-    "49036"
+    "49036",
+    "49047"
   ],
   "seen_jobs": [
+    {
+      "id": "49047",
+      "posting_date": "Aug/07/2026",
+      "title": "TA/Demo/TUR/Sem. Leaders - RLGN 2020 (CUPE Students)",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=49047&Language=1"
+    },
     {
       "id": "49046",
       "posting_date": "Aug/07/2026",
@@ -592,12 +605,6 @@
       "posting_date": "Aug/06/2026",
       "title": "Sessional Instructor - IDM 1010 A01 (CUPE Sessional)",
       "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48969&Language=1"
-    },
-    {
-      "id": "48963",
-      "posting_date": "Aug/06/2026",
-      "title": "GMGT 7210 Sessional Instructor Fall 2026",
-      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48963&Language=1"
     }
   ],
   "version": 3
