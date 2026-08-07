@@ -1,7 +1,7 @@
 {
   "initialized": true,
   "last_dispatch_utc": "2026-08-06T15:00:57+00:00",
-  "last_success_utc": "2026-08-07T15:11:07+00:00",
+  "last_success_utc": "2026-08-07T16:10:23+00:00",
   "pending_jobs": [
     {
       "id": "49007",
@@ -176,6 +176,72 @@
       "posting_date": "Aug/07/2026",
       "title": "Teaching Assistant - CHSC 7320 - CUPE Unit 1",
       "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=49031&Language=1"
+    },
+    {
+      "id": "49046",
+      "posting_date": "Aug/07/2026",
+      "title": "TA/Demo/TUR/Sem. Leaders - RLGN 1430 (CUPE Students)",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=49046&Language=1"
+    },
+    {
+      "id": "49045",
+      "posting_date": "Aug/07/2026",
+      "title": "Grader/Marker - RLGN 1324 (CUPE Students)",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=49045&Language=1"
+    },
+    {
+      "id": "49044",
+      "posting_date": "Aug/07/2026",
+      "title": "TA/Demo/TUR/Sem. Leaders - VARIOUS COMP (CUPE Students)",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=49044&Language=1"
+    },
+    {
+      "id": "49043",
+      "posting_date": "Aug/07/2026",
+      "title": "Grader/Marker - RLGN 1322 (CUPE Students)",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=49043&Language=1"
+    },
+    {
+      "id": "49042",
+      "posting_date": "Aug/07/2026",
+      "title": "TA/Demo/TUR/Sem. Leader - RLGN 1424 (CUPE Students)",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=49042&Language=1"
+    },
+    {
+      "id": "49041",
+      "posting_date": "Aug/07/2026",
+      "title": "TA/Demo/TUR/Sem. Leaders - 1000-Level COMP (CUPE Students)",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=49041&Language=1"
+    },
+    {
+      "id": "49040",
+      "posting_date": "Aug/07/2026",
+      "title": "Grader/Markers - 1000-level COMP (CUPE Students)",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=49040&Language=1"
+    },
+    {
+      "id": "49039",
+      "posting_date": "Aug/07/2026",
+      "title": "TA/Demo/TUR/Sem. Leaders - COMP 1002 2002 (CUPE Students)",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=49039&Language=1"
+    },
+    {
+      "id": "49038",
+      "posting_date": "Aug/07/2026",
+      "title": "Grader/Markers - 2000-level COMP Courses (CUPE Students)",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=49038&Language=1"
+    },
+    {
+      "id": "49037",
+      "posting_date": "Aug/07/2026",
+      "title": "Tutor FAAH 2080",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=49037&Language=1"
+    },
+    {
+      "id": "49036",
+      "posting_date": "Aug/07/2026",
+      "title": "Tutor FAAH 2090",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=49036&Language=1"
     }
   ],
   "seen_ids": [
@@ -279,9 +345,86 @@
     "48970",
     "48969",
     "48963",
-    "49031"
+    "49031",
+    "49046",
+    "49045",
+    "49044",
+    "49043",
+    "49042",
+    "49041",
+    "49040",
+    "49039",
+    "49038",
+    "49037",
+    "49036"
   ],
   "seen_jobs": [
+    {
+      "id": "49046",
+      "posting_date": "Aug/07/2026",
+      "title": "TA/Demo/TUR/Sem. Leaders - RLGN 1430 (CUPE Students)",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=49046&Language=1"
+    },
+    {
+      "id": "49045",
+      "posting_date": "Aug/07/2026",
+      "title": "Grader/Marker - RLGN 1324 (CUPE Students)",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=49045&Language=1"
+    },
+    {
+      "id": "49044",
+      "posting_date": "Aug/07/2026",
+      "title": "TA/Demo/TUR/Sem. Leaders - VARIOUS COMP (CUPE Students)",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=49044&Language=1"
+    },
+    {
+      "id": "49043",
+      "posting_date": "Aug/07/2026",
+      "title": "Grader/Marker - RLGN 1322 (CUPE Students)",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=49043&Language=1"
+    },
+    {
+      "id": "49042",
+      "posting_date": "Aug/07/2026",
+      "title": "TA/Demo/TUR/Sem. Leader - RLGN 1424 (CUPE Students)",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=49042&Language=1"
+    },
+    {
+      "id": "49041",
+      "posting_date": "Aug/07/2026",
+      "title": "TA/Demo/TUR/Sem. Leaders - 1000-Level COMP (CUPE Students)",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=49041&Language=1"
+    },
+    {
+      "id": "49040",
+      "posting_date": "Aug/07/2026",
+      "title": "Grader/Markers - 1000-level COMP (CUPE Students)",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=49040&Language=1"
+    },
+    {
+      "id": "49039",
+      "posting_date": "Aug/07/2026",
+      "title": "TA/Demo/TUR/Sem. Leaders - COMP 1002 2002 (CUPE Students)",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=49039&Language=1"
+    },
+    {
+      "id": "49038",
+      "posting_date": "Aug/07/2026",
+      "title": "Grader/Markers - 2000-level COMP Courses (CUPE Students)",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=49038&Language=1"
+    },
+    {
+      "id": "49037",
+      "posting_date": "Aug/07/2026",
+      "title": "Tutor FAAH 2080",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=49037&Language=1"
+    },
+    {
+      "id": "49036",
+      "posting_date": "Aug/07/2026",
+      "title": "Tutor FAAH 2090",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=49036&Language=1"
+    },
     {
       "id": "49031",
       "posting_date": "Aug/07/2026",
@@ -455,72 +598,6 @@
       "posting_date": "Aug/06/2026",
       "title": "GMGT 7210 Sessional Instructor Fall 2026",
       "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48963&Language=1"
-    },
-    {
-      "id": "48961",
-      "posting_date": "Aug/06/2026",
-      "title": "STAT 1000 A01 Sessional Fall",
-      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48961&Language=1"
-    },
-    {
-      "id": "48954",
-      "posting_date": "Aug/05/2026",
-      "title": "Teaching Assistant - ENG 1430 B02",
-      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48954&Language=1"
-    },
-    {
-      "id": "48951",
-      "posting_date": "Aug/05/2026",
-      "title": "Grader/Marker CLAS 1520 (CUPE Student)",
-      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48951&Language=1"
-    },
-    {
-      "id": "48950",
-      "posting_date": "Aug/05/2026",
-      "title": "Grader/Marker CLAS 1520 (CUPE Student)",
-      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48950&Language=1"
-    },
-    {
-      "id": "48948",
-      "posting_date": "Aug/05/2026",
-      "title": "TA/Demo/TUR/Sem. Leaders - ANSC 0420 (CUPE Students)",
-      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48948&Language=1"
-    },
-    {
-      "id": "48944",
-      "posting_date": "Aug/05/2026",
-      "title": "System and Data Engineer - IT4 (AESES)",
-      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48944&Language=1"
-    },
-    {
-      "id": "48942",
-      "posting_date": "Aug/05/2026",
-      "title": "Operations Assistant- Office Assistant 5 (AESES)",
-      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48942&Language=1"
-    },
-    {
-      "id": "48933",
-      "posting_date": "Aug/05/2026",
-      "title": "Sessional Instructor - EDUA 5620 (Repost)",
-      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48933&Language=1"
-    },
-    {
-      "id": "48932",
-      "posting_date": "Aug/05/2026",
-      "title": "TA/Demo/TUR/Sem. Leaders - PHIL 2170 (CUPE Students)",
-      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48932&Language=1"
-    },
-    {
-      "id": "48931",
-      "posting_date": "Aug/05/2026",
-      "title": "GMGT 2070 A01 Sessional",
-      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48931&Language=1"
-    },
-    {
-      "id": "48929",
-      "posting_date": "Aug/05/2026",
-      "title": "Sessional Instructor - BIOE 7380",
-      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48929&Language=1"
     }
   ],
   "version": 3
