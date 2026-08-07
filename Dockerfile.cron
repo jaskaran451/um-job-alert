@@ -15,4 +15,4 @@ RUN pip install --no-cache-dir --upgrade pip \
 
 COPY . .
 
-CMD ["python", "railway_cron.py"]
+CMD ["timeout", "--signal=TERM", "300s", "python", "railway_cron.py"]
