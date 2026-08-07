@@ -8,12 +8,14 @@ from pathlib import Path
 from typing import Any
 
 from flask import Flask, jsonify, render_template, request
-from sqlalchemy import create_engine, select, text
+from sqlalchemy import create_engine, desc, select, text
 from sqlalchemy.orm import Session
 
 from delivery_service import dispatch_to_subscribers
 from models import (
     Base,
+    MonitorState,
+    PortalJob,
     Subscription,
     TelegramConnection,
     normalize_database_url,
@@ -107,7 +109,7 @@ def create_app(test_config: dict[str, Any] | None = None) -> Flask:
 
     @app.get("/")
     def index():
-        latest_jobs, last_updated = load_latest_jobs()
+        latest_jobs, last_updated = load_latest_jobs(engine)
         return render_template(
             "index.html",
             latest_jobs=latest_jobs[:6],
@@ -361,7 +363,45 @@ def sanitize_jobs(value: Any) -> list[dict[str, str]]:
     return jobs
 
 
-def load_latest_jobs() -> tuple[list[dict[str, str]], str | None]:
+def load_latest_jobs(engine) -> tuple[list[dict[str, str]], str | None]:
+    """Load the live portal snapshot from PostgreSQL with a JSON fallback."""
+    try:
+        with Session(engine) as session:
+            rows = list(
+                session.scalars(
+                    select(PortalJob)
+                    .where(PortalJob.title != "")
+                    .order_by(
+                        desc(PortalJob.posted_on),
+                        desc(PortalJob.job_id),
+                    )
+                    .limit(40)
+                )
+            )
+            state = session.get(MonitorState, 1)
+
+        if rows:
+            return (
+                [
+                    {
+                        "id": row.job_id,
+                        "title": row.title,
+                        "posting_date": row.posting_date,
+                        "url": row.url,
+                    }
+                    for row in rows
+                ],
+                (
+                    state.last_success_at.isoformat()
+                    if state and state.last_success_at
+                    else None
+                ),
+            )
+    except Exception:
+        # During a first deployment, retain the committed snapshot until the
+        # cron service has completed its initial PostgreSQL migration.
+        pass
+
     try:
         state = json.loads(
             (BASE_DIR / "data" / "seen_jobs.json").read_text(

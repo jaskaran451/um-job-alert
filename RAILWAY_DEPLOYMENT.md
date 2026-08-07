@@ -1,134 +1,177 @@
-# Deploy the UM Job Alerts website on Railway
+# Deploy UM Job Alerts on Railway
 
-GitHub Actions checks the University of Manitoba job portal. Railway hosts the
-public website, PostgreSQL preferences database, protected dispatch API, and
-Telegram webhook. Public subscribers receive alerts only through Telegram.
+Railway runs two services from the same repository:
 
-## 1. Connect the web service to PostgreSQL
+1. **Web service** — public signup page, Telegram webhook, and PostgreSQL access.
+2. **Cron service** — checks the University of Manitoba portal every 30 minutes,
+   saves monitoring state in PostgreSQL, sends matching Telegram alerts, and
+   exits.
 
-The PostgreSQL service and web service must be in the same Railway project.
+GitHub Actions remains available only as a manual emergency fallback. It is no
+longer the production scheduler.
 
-1. Open the **web application service**, not the Postgres service.
-2. Open **Variables**.
-3. Choose **Add Reference Variable**.
-4. Select the PostgreSQL service and its `DATABASE_URL`.
-5. Deploy the staged changes.
+## 1. Existing web service
 
-When the database service is named `Postgres`, the web service should show:
+Keep the existing web service connected to PostgreSQL:
 
 ```text
 DATABASE_URL=${{Postgres.DATABASE_URL}}
 ```
 
-The repository runs this before each deployment:
-
-```text
-python verify_database.py && python configure_telegram_webhook.py
-```
-
-Deployment stops if PostgreSQL is unavailable or Telegram cannot be configured.
-
-## 2. Generate the public website domain
-
-Open **Settings → Networking → Generate Domain**, then add:
-
-```text
-BASE_URL=https://${{RAILWAY_PUBLIC_DOMAIN}}
-```
-
-The Telegram webhook must use the public HTTPS domain.
-
-## 3. Add web-service variables
+Required web-service variables:
 
 ```text
 APP_SECRET_KEY=<long-random-secret>
 DISPATCH_API_KEY=<different-long-random-secret>
+BASE_URL=https://${{RAILWAY_PUBLIC_DOMAIN}}
 TELEGRAM_BOT_TOKEN=<BotFather token>
 TELEGRAM_BOT_USERNAME=<username without @>
 TELEGRAM_WEBHOOK_SECRET=<another-long-random-secret>
 TELEGRAM_CONNECT_TTL_MINUTES=30
 ```
 
-Generate independent secrets with:
+The web service continues to use the root `railway.json` file and starts
+Gunicorn. Its pre-deploy command creates and verifies all PostgreSQL tables and
+configures the Telegram webhook.
 
-```bash
-python -c "import secrets; print(secrets.token_urlsafe(48))"
-```
+## 2. Create the Railway cron service
 
-No SMTP or email variables are required. The public website does not collect an
-email address and does not send subscriber emails.
+In the same Railway project:
 
-## 4. Verify the deployment
-
-Open:
-
-```text
-https://your-domain.up.railway.app/
-https://your-domain.up.railway.app/healthz
-```
-
-The health endpoint should report PostgreSQL and Telegram availability. In the
-deployment logs, confirm that database verification succeeds and the webhook is
-configured for:
+1. Click **New → GitHub Repo**.
+2. Select this repository again.
+3. Name the new service something clear, such as `UM Job Monitor`.
+4. Keep its source branch set to `main`.
+5. Open **Settings → Build**.
+6. Set **Railway Config File** to:
 
 ```text
-https://your-domain.up.railway.app/api/telegram/webhook
+/railway-cron.json
 ```
 
-## 5. Connect GitHub Actions to Railway
+This is critical. Without the custom config path, Railway would use the web
+service's `railway.json` and start Gunicorn instead of the scraper.
 
-In GitHub, open **Settings → Secrets and variables → Actions**.
-
-Add this Actions variable:
+The cron config uses:
 
 ```text
-SUBSCRIBER_API_URL=https://your-domain.up.railway.app
+Dockerfile: Dockerfile.cron
+Start command: python railway_cron.py
+Cron schedule: */30 * * * *
+Restart policy: Never
 ```
 
-Add this Actions secret:
+Railway cron schedules are evaluated in UTC. Because this schedule runs every
+30 minutes, no timezone conversion is needed.
+
+## 3. Add cron-service variables
+
+The cron service needs only the shared PostgreSQL database and Telegram bot
+token:
 
 ```text
-SUBSCRIBER_API_KEY=<same value as Railway DISPATCH_API_KEY>
+DATABASE_URL=${{Postgres.DATABASE_URL}}
+TELEGRAM_BOT_TOKEN=<same BotFather token used by the web service>
 ```
 
-The scheduled workflow sends only newly detected jobs to Railway's protected
-`/api/internal/dispatch` endpoint.
+Optional tuning variables:
 
-## 6. Test Telegram delivery
-
-1. Open the live website.
-2. Choose **All new postings**.
-3. Accept Telegram notifications and click **Create Telegram alert**.
-4. Click **Connect Telegram** and press **Start** in the bot.
-5. Send `/status` and confirm alerts are active.
-6. Run this protected test dispatch:
-
-```bash
-curl -X POST "https://your-domain.up.railway.app/api/internal/dispatch" \
-  -H "Content-Type: application/json" \
-  -H "X-Dispatch-Key: YOUR_DISPATCH_API_KEY" \
-  -d '{"jobs":[{"id":"TEST-TELEGRAM-001","title":"Test posting - UM Job Alerts is connected","posting_date":"Aug/05/2026","url":"https://viprecprod.ad.umanitoba.ca/default"}]}'
+```text
+MAX_ALERT_AGE_DAYS=14
+PAGE_TIMEOUT_MS=120000
+TELEGRAM_JOBS_PER_MESSAGE=8
+TELEGRAM_MESSAGE_LIMIT=3800
+LOG_LEVEL=INFO
 ```
 
-Use a new test job ID for each repeat because successful Telegram deliveries are
-recorded and intentionally not sent twice.
+The cron Docker image installs Playwright Chromium and its Linux dependencies.
+No public domain, port, webhook secret, or email variables are required for this
+service.
+
+## 4. First-run migration
+
+On its first run, the cron service imports the committed
+`data/seen_jobs.json` history into PostgreSQL. This preserves:
+
+- previously observed requisition IDs;
+- the latest portal snapshot;
+- any retryable pending jobs;
+- the last successful scrape and dispatch timestamps.
+
+The migration prevents current jobs from being announced again simply because
+the scheduler changed. After the import, PostgreSQL becomes the monitoring
+source of truth.
+
+The website also reads its latest-job cards from PostgreSQL. It temporarily
+falls back to `data/seen_jobs.json` until the first cron run completes.
+
+## 5. Test before relying on the schedule
+
+After deploying the cron service, open its deployment and run it once manually.
+A successful log should include lines similar to:
+
+```text
+Imported 500 legacy seen requisitions into PostgreSQL.
+Read 50 jobs from /default; 0 unseen, 0 fresh for alert, 0 suppressed as old.
+No pending Telegram jobs to dispatch.
+```
+
+The exact imported count will vary.
+
+Then verify the next scheduled execution appears about 30 minutes later. The
+cron process must finish and show a completed deployment. If a run remains
+`Active`, Railway will skip the next scheduled execution.
+
+## 6. Failure and retry behavior
+
+The cron service writes newly discovered jobs to PostgreSQL before sending
+Telegram messages.
+
+```text
+Scrape /default
+      ↓
+Persist new and seen requisitions in PostgreSQL
+      ↓
+Dispatch matching Telegram alerts
+      ↓
+Clear pending jobs only after successful delivery
+```
+
+If Telegram fails or the process exits unexpectedly, pending jobs remain in
+PostgreSQL for the next cron run. Successful per-user deliveries are already
+recorded, so retries do not resend completed batches.
+
+Jobs older than `MAX_ALERT_AGE_DAYS` are remembered but suppressed from alerts.
+This prevents an old posting that reappears on the portal from being announced
+as new.
+
+## 7. GitHub Actions fallback
+
+The workflow is now named:
+
+```text
+UM Job Alert - Manual Fallback
+```
+
+It has only a `workflow_dispatch` trigger. It will not run on a schedule, but it
+can still be launched manually from GitHub Actions during Railway maintenance.
 
 ## Production architecture
 
 ```text
-University of Manitoba public job portal
+University of Manitoba /default portal
                  |
                  v
-      GitHub Actions monitor
+       Railway cron every 30 minutes
                  |
                  v
-        Railway dispatch API
-                 |
-                 v
-      PostgreSQL preferences
-                 |
-                 v
-       Personalized Telegram
+         Railway PostgreSQL state
+            /               \
+           v                 v
+  Website latest jobs   Matching engine
+                              |
+                              v
+                    Personalized Telegram
 ```
 
 The website is an independent project and is not affiliated with the University

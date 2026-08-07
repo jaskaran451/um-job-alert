@@ -1,10 +1,11 @@
 from __future__ import annotations
 
 import json
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 
 from sqlalchemy import (
     Boolean,
+    Date,
     DateTime,
     ForeignKey,
     Integer,
@@ -129,4 +130,58 @@ class Delivery(Base):
     delivered_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         default=utc_now,
+    )
+
+
+class PortalJob(Base):
+    """A requisition observed on the public University job portal."""
+
+    __tablename__ = "portal_jobs"
+
+    job_id: Mapped[str] = mapped_column(String(30), primary_key=True)
+    title: Mapped[str] = mapped_column(String(240), default="")
+    posting_date: Mapped[str] = mapped_column(String(40), default="")
+    posted_on: Mapped[date | None] = mapped_column(Date, index=True)
+    url: Mapped[str] = mapped_column(String(500), default="")
+    first_seen_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        default=utc_now,
+        index=True,
+    )
+    last_seen_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        default=utc_now,
+        onupdate=utc_now,
+        index=True,
+    )
+    pending_delivery: Mapped[bool] = mapped_column(
+        Boolean,
+        default=False,
+        index=True,
+    )
+    suppressed_old: Mapped[bool] = mapped_column(
+        Boolean,
+        default=False,
+        index=True,
+    )
+
+
+class MonitorState(Base):
+    """Singleton state for the Railway cron monitor."""
+
+    __tablename__ = "monitor_state"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, default=1)
+    initialized: Mapped[bool] = mapped_column(Boolean, default=False)
+    last_success_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True)
+    )
+    last_dispatch_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True)
+    )
+    last_job_count: Mapped[int] = mapped_column(Integer, default=0)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        default=utc_now,
+        onupdate=utc_now,
     )

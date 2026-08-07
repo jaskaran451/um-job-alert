@@ -1,15 +1,13 @@
-name: UM Job Alert
+name: UM Job Alert - Manual Fallback
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: "17,47 * * * *"
 
 permissions:
   contents: write
 
 concurrency:
-  group: um-job-alert
+  group: um-job-alert-manual
   cancel-in-progress: false
 
 jobs:

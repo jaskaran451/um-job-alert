@@ -8,6 +8,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: test-web-app-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   test:
     runs-on: ubuntu-24.04
@@ -23,7 +27,7 @@ jobs:
       - name: Install dependencies
         run: pip install --disable-pip-version-check -r requirements.txt
       - name: Check Python syntax
-        run: python -m compileall -q app.py models.py delivery_service.py telegram_service.py configure_telegram_webhook.py verify_database.py
+        run: python -m compileall -q app.py models.py delivery_service.py telegram_service.py configure_telegram_webhook.py verify_database.py um_job_alert.py railway_cron.py
       - name: Check JavaScript syntax
         run: node --check static/app.js
       - name: Run tests
