@@ -5,7 +5,7 @@
     "dockerfilePath": "Dockerfile.cron"
   },
   "deploy": {
-    "startCommand": "python railway_cron.py",
+    "startCommand": "timeout --signal=TERM 300s python railway_cron.py",
     "cronSchedule": "*/30 * * * *",
     "restartPolicyType": "NEVER",
     "restartPolicyMaxRetries": 0
