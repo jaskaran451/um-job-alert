@@ -1,8 +1,177 @@
 {
   "initialized": true,
   "last_dispatch_utc": "2026-08-06T15:00:57+00:00",
-  "last_success_utc": "2026-08-06T15:00:54+00:00",
-  "pending_jobs": [],
+  "last_success_utc": "2026-08-07T00:32:56+00:00",
+  "pending_jobs": [
+    {
+      "id": "49007",
+      "posting_date": "Aug/06/2026",
+      "title": "Teaching Assistant - PSYC 7550 (CUPE Students)",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=49007&Language=1"
+    },
+    {
+      "id": "49006",
+      "posting_date": "Aug/06/2026",
+      "title": "Teaching Assistant - PSYC 7022 (CUPE Students)",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=49006&Language=1"
+    },
+    {
+      "id": "49005",
+      "posting_date": "Aug/06/2026",
+      "title": "Teaching Assistant - PSYC 7320 (CUPE Students)",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=49005&Language=1"
+    },
+    {
+      "id": "49004",
+      "posting_date": "Aug/06/2026",
+      "title": "Grader/Marker - PSYC 1200 (CUPE Students)",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=49004&Language=1"
+    },
+    {
+      "id": "49003",
+      "posting_date": "Aug/06/2026",
+      "title": "Grader/Marker DIST PSYC Various (CUPE Students)",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=49003&Language=1"
+    },
+    {
+      "id": "49002",
+      "posting_date": "Aug/06/2026",
+      "title": "Grader/Marker PSYC Various (CUPE Students)",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=49002&Language=1"
+    },
+    {
+      "id": "48998",
+      "posting_date": "Aug/06/2026",
+      "title": "Patient Care Coordinator, CSS",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48998&Language=1"
+    },
+    {
+      "id": "48994",
+      "posting_date": "Aug/06/2026",
+      "title": "Distance Delivery Instructor SWRK 4258",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48994&Language=1"
+    },
+    {
+      "id": "48993",
+      "posting_date": "Aug/06/2026",
+      "title": "Distance Delivery Instructor SWRK 1230",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48993&Language=1"
+    },
+    {
+      "id": "48992",
+      "posting_date": "Aug/06/2026",
+      "title": "Distance Delivery Instructor SWRK 2030",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48992&Language=1"
+    },
+    {
+      "id": "48991",
+      "posting_date": "Aug/06/2026",
+      "title": "Distance Delivery Instructor SWRK 3190",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48991&Language=1"
+    },
+    {
+      "id": "48989",
+      "posting_date": "Aug/06/2026",
+      "title": "Sessional Instructor - SWRK 1250 (CUPE Sessional)",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48989&Language=1"
+    },
+    {
+      "id": "48988",
+      "posting_date": "Aug/06/2026",
+      "title": "Sessional Instructor - SWRK 1250 (CUPE Sessional)",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48988&Language=1"
+    },
+    {
+      "id": "48985",
+      "posting_date": "Aug/06/2026",
+      "title": "Teaching Assistant - BIOE 2900",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48985&Language=1"
+    },
+    {
+      "id": "48984",
+      "posting_date": "Aug/06/2026",
+      "title": "Grader Marker",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48984&Language=1"
+    },
+    {
+      "id": "48983",
+      "posting_date": "Aug/06/2026",
+      "title": "Teaching Assistant - BIOE 4650",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48983&Language=1"
+    },
+    {
+      "id": "48982",
+      "posting_date": "Aug/06/2026",
+      "title": "Teaching Assistant",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48982&Language=1"
+    },
+    {
+      "id": "48979",
+      "posting_date": "Aug/06/2026",
+      "title": "Comptroller - Level 11 (EMAPS)",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48979&Language=1"
+    },
+    {
+      "id": "48978",
+      "posting_date": "Aug/06/2026",
+      "title": "Research Coordinator - Tech 5 (AESES)",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48978&Language=1"
+    },
+    {
+      "id": "48977",
+      "posting_date": "Aug/06/2026",
+      "title": "Grader/Marker - IDM 3010 (CUPE Students)",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48977&Language=1"
+    },
+    {
+      "id": "48976",
+      "posting_date": "Aug/06/2026",
+      "title": "Grader/Marker - IDM 2020 (CUPE Students)",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48976&Language=1"
+    },
+    {
+      "id": "48975",
+      "posting_date": "Aug/06/2026",
+      "title": "Grader/Marker - IDM 1020 (CUPE Students)",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48975&Language=1"
+    },
+    {
+      "id": "48974",
+      "posting_date": "Aug/06/2026",
+      "title": "Grader/Marker - IDM 1010 (CUPE Students)",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48974&Language=1"
+    },
+    {
+      "id": "48973",
+      "posting_date": "Aug/06/2026",
+      "title": "Research Associate - Indigenous Data Sovereignty",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48973&Language=1"
+    },
+    {
+      "id": "48972",
+      "posting_date": "Aug/06/2026",
+      "title": "TA/Demo/TUR/Sem. Leaders - ENTM 2050 (CUPE Students)",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48972&Language=1"
+    },
+    {
+      "id": "48970",
+      "posting_date": "Aug/06/2026",
+      "title": "Sessional Instructor GEOG/GPE 1700",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48970&Language=1"
+    },
+    {
+      "id": "48969",
+      "posting_date": "Aug/06/2026",
+      "title": "Sessional Instructor - IDM 1010 A01 (CUPE Sessional)",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48969&Language=1"
+    },
+    {
+      "id": "48963",
+      "posting_date": "Aug/06/2026",
+      "title": "GMGT 7210 Sessional Instructor Fall 2026",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48963&Language=1"
+    }
+  ],
   "seen_ids": [
     "48954",
     "48951",
@@ -75,9 +244,205 @@
     "48149",
     "48147",
     "48145",
-    "48961"
+    "48961",
+    "49007",
+    "49006",
+    "49005",
+    "49004",
+    "49003",
+    "49002",
+    "48998",
+    "48994",
+    "48993",
+    "48992",
+    "48991",
+    "48989",
+    "48988",
+    "48985",
+    "48984",
+    "48983",
+    "48982",
+    "48979",
+    "48978",
+    "48977",
+    "48976",
+    "48975",
+    "48974",
+    "48973",
+    "48972",
+    "48970",
+    "48969",
+    "48963"
   ],
   "seen_jobs": [
+    {
+      "id": "49007",
+      "posting_date": "Aug/06/2026",
+      "title": "Teaching Assistant - PSYC 7550 (CUPE Students)",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=49007&Language=1"
+    },
+    {
+      "id": "49006",
+      "posting_date": "Aug/06/2026",
+      "title": "Teaching Assistant - PSYC 7022 (CUPE Students)",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=49006&Language=1"
+    },
+    {
+      "id": "49005",
+      "posting_date": "Aug/06/2026",
+      "title": "Teaching Assistant - PSYC 7320 (CUPE Students)",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=49005&Language=1"
+    },
+    {
+      "id": "49004",
+      "posting_date": "Aug/06/2026",
+      "title": "Grader/Marker - PSYC 1200 (CUPE Students)",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=49004&Language=1"
+    },
+    {
+      "id": "49003",
+      "posting_date": "Aug/06/2026",
+      "title": "Grader/Marker DIST PSYC Various (CUPE Students)",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=49003&Language=1"
+    },
+    {
+      "id": "49002",
+      "posting_date": "Aug/06/2026",
+      "title": "Grader/Marker PSYC Various (CUPE Students)",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=49002&Language=1"
+    },
+    {
+      "id": "48998",
+      "posting_date": "Aug/06/2026",
+      "title": "Patient Care Coordinator, CSS",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48998&Language=1"
+    },
+    {
+      "id": "48994",
+      "posting_date": "Aug/06/2026",
+      "title": "Distance Delivery Instructor SWRK 4258",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48994&Language=1"
+    },
+    {
+      "id": "48993",
+      "posting_date": "Aug/06/2026",
+      "title": "Distance Delivery Instructor SWRK 1230",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48993&Language=1"
+    },
+    {
+      "id": "48992",
+      "posting_date": "Aug/06/2026",
+      "title": "Distance Delivery Instructor SWRK 2030",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48992&Language=1"
+    },
+    {
+      "id": "48991",
+      "posting_date": "Aug/06/2026",
+      "title": "Distance Delivery Instructor SWRK 3190",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48991&Language=1"
+    },
+    {
+      "id": "48989",
+      "posting_date": "Aug/06/2026",
+      "title": "Sessional Instructor - SWRK 1250 (CUPE Sessional)",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48989&Language=1"
+    },
+    {
+      "id": "48988",
+      "posting_date": "Aug/06/2026",
+      "title": "Sessional Instructor - SWRK 1250 (CUPE Sessional)",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48988&Language=1"
+    },
+    {
+      "id": "48985",
+      "posting_date": "Aug/06/2026",
+      "title": "Teaching Assistant - BIOE 2900",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48985&Language=1"
+    },
+    {
+      "id": "48984",
+      "posting_date": "Aug/06/2026",
+      "title": "Grader Marker",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48984&Language=1"
+    },
+    {
+      "id": "48983",
+      "posting_date": "Aug/06/2026",
+      "title": "Teaching Assistant - BIOE 4650",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48983&Language=1"
+    },
+    {
+      "id": "48982",
+      "posting_date": "Aug/06/2026",
+      "title": "Teaching Assistant",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48982&Language=1"
+    },
+    {
+      "id": "48979",
+      "posting_date": "Aug/06/2026",
+      "title": "Comptroller - Level 11 (EMAPS)",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48979&Language=1"
+    },
+    {
+      "id": "48978",
+      "posting_date": "Aug/06/2026",
+      "title": "Research Coordinator - Tech 5 (AESES)",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48978&Language=1"
+    },
+    {
+      "id": "48977",
+      "posting_date": "Aug/06/2026",
+      "title": "Grader/Marker - IDM 3010 (CUPE Students)",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48977&Language=1"
+    },
+    {
+      "id": "48976",
+      "posting_date": "Aug/06/2026",
+      "title": "Grader/Marker - IDM 2020 (CUPE Students)",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48976&Language=1"
+    },
+    {
+      "id": "48975",
+      "posting_date": "Aug/06/2026",
+      "title": "Grader/Marker - IDM 1020 (CUPE Students)",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48975&Language=1"
+    },
+    {
+      "id": "48974",
+      "posting_date": "Aug/06/2026",
+      "title": "Grader/Marker - IDM 1010 (CUPE Students)",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48974&Language=1"
+    },
+    {
+      "id": "48973",
+      "posting_date": "Aug/06/2026",
+      "title": "Research Associate - Indigenous Data Sovereignty",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48973&Language=1"
+    },
+    {
+      "id": "48972",
+      "posting_date": "Aug/06/2026",
+      "title": "TA/Demo/TUR/Sem. Leaders - ENTM 2050 (CUPE Students)",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48972&Language=1"
+    },
+    {
+      "id": "48970",
+      "posting_date": "Aug/06/2026",
+      "title": "Sessional Instructor GEOG/GPE 1700",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48970&Language=1"
+    },
+    {
+      "id": "48969",
+      "posting_date": "Aug/06/2026",
+      "title": "Sessional Instructor - IDM 1010 A01 (CUPE Sessional)",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48969&Language=1"
+    },
+    {
+      "id": "48963",
+      "posting_date": "Aug/06/2026",
+      "title": "GMGT 7210 Sessional Instructor Fall 2026",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48963&Language=1"
+    },
     {
       "id": "48961",
       "posting_date": "Aug/06/2026",
@@ -91,12 +456,6 @@
       "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48955&Language=1"
     },
     {
-      "id": "48954",
-      "posting_date": "Aug/05/2026",
-      "title": "Teaching Assistant - ENG 1430 B02",
-      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48954&Language=1"
-    },
-    {
       "id": "48953",
       "posting_date": "Aug/05/2026",
       "title": "Teaching Assistant - ENG 1430 B02",
@@ -107,30 +466,6 @@
       "posting_date": "Aug/05/2026",
       "title": "Teaching Assistant - ENG 1430 A02",
       "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48952&Language=1"
-    },
-    {
-      "id": "48951",
-      "posting_date": "Aug/05/2026",
-      "title": "Grader/Marker CLAS 1520 (CUPE Student)",
-      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48951&Language=1"
-    },
-    {
-      "id": "48950",
-      "posting_date": "Aug/05/2026",
-      "title": "Grader/Marker CLAS 1520 (CUPE Student)",
-      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48950&Language=1"
-    },
-    {
-      "id": "48948",
-      "posting_date": "Aug/05/2026",
-      "title": "TA/Demo/TUR/Sem. Leaders - ANSC 0420 (CUPE Students)",
-      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48948&Language=1"
-    },
-    {
-      "id": "48944",
-      "posting_date": "Aug/05/2026",
-      "title": "System and Data Engineer - IT4 (AESES)",
-      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48944&Language=1"
     },
     {
       "id": "48942",
@@ -179,144 +514,6 @@
       "posting_date": "Aug/05/2026",
       "title": "Research & Laboratory Support Specialist - Tech 4 (AESES)",
       "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48935&Language=1"
-    },
-    {
-      "id": "48933",
-      "posting_date": "Aug/05/2026",
-      "title": "Sessional Instructor - EDUA 5620 (Repost)",
-      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48933&Language=1"
-    },
-    {
-      "id": "48932",
-      "posting_date": "Aug/05/2026",
-      "title": "TA/Demo/TUR/Sem. Leaders - PHIL 2170 (CUPE Students)",
-      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48932&Language=1"
-    },
-    {
-      "id": "48931",
-      "posting_date": "Aug/05/2026",
-      "title": "GMGT 2070 A01 Sessional",
-      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48931&Language=1"
-    },
-    {
-      "id": "48929",
-      "posting_date": "Aug/05/2026",
-      "title": "Sessional Instructor - BIOE 7380",
-      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48929&Language=1"
-    },
-    {
-      "id": "48922",
-      "posting_date": "Aug/05/2026",
-      "title": "Sessional Instructor- SWRK 7600 A01",
-      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48922&Language=1"
-    },
-    {
-      "id": "48921",
-      "posting_date": "Aug/05/2026",
-      "title": "Sessional Instructor- SWRK 7004- Spanned",
-      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48921&Language=1"
-    },
-    {
-      "id": "48920",
-      "posting_date": "Aug/05/2026",
-      "title": "Sessional Instructor- SWRK 7002 A01- Fall 2026",
-      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48920&Language=1"
-    },
-    {
-      "id": "48916",
-      "posting_date": "Aug/05/2026",
-      "title": "Sessional Instructor",
-      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48916&Language=1"
-    },
-    {
-      "id": "48913",
-      "posting_date": "Aug/05/2026",
-      "title": "Sessional Instructor - DS 7040 (CUPE Sessional)",
-      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48913&Language=1"
-    },
-    {
-      "id": "48912",
-      "posting_date": "Aug/05/2026",
-      "title": "Sessional Instructor - DS 7040 (CUPE Sessionals)",
-      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48912&Language=1"
-    },
-    {
-      "id": "48911",
-      "posting_date": "Aug/05/2026",
-      "title": "Student Sessional Instructor - AGRI 1600 K01 - Fall 2026",
-      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48911&Language=1"
-    },
-    {
-      "id": "48910",
-      "posting_date": "Aug/05/2026",
-      "title": "TA/Demo/TUR/Sem. Leaders - AGRI 2400 (CUPE Students)",
-      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48910&Language=1"
-    },
-    {
-      "id": "48909",
-      "posting_date": "Aug/05/2026",
-      "title": "TA/Demo/TUR/Sem. Leaders - AGEC 2370 (CUPE Students)",
-      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48909&Language=1"
-    },
-    {
-      "id": "48908",
-      "posting_date": "Aug/05/2026",
-      "title": "Grader/Marker - ENTM 3190 (CUPE Students)",
-      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48908&Language=1"
-    },
-    {
-      "id": "48904",
-      "posting_date": "Aug/04/2026",
-      "title": "TA - CHEM2122",
-      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48904&Language=1"
-    },
-    {
-      "id": "48903",
-      "posting_date": "Aug/04/2026",
-      "title": "Sessional Instructor- SWRK 1210- A03- Fall 2026",
-      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48903&Language=1"
-    },
-    {
-      "id": "48897",
-      "posting_date": "Aug/04/2026",
-      "title": "Receptionist - OA3 (AESES)",
-      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48897&Language=1"
-    },
-    {
-      "id": "48895",
-      "posting_date": "Aug/04/2026",
-      "title": "Financial Analyst - AA3 (AESES)",
-      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48895&Language=1"
-    },
-    {
-      "id": "48888",
-      "posting_date": "Aug/04/2026",
-      "title": "Student Lecturer",
-      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48888&Language=1"
-    },
-    {
-      "id": "48874",
-      "posting_date": "Aug/04/2026",
-      "title": "Lecturer/Instructor - EDUB 3100",
-      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48874&Language=1"
-    },
-    {
-      "id": "48872",
-      "posting_date": "Aug/04/2026",
-      "title": "Lecturer/Instructor - EDUB 3100",
-      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48872&Language=1"
-    },
-    {
-      "id": "48866",
-      "posting_date": "Aug/04/2026",
-      "title": "Teaching Assistant - EDUB 4146",
-      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48866&Language=1"
-    },
-    {
-      "id": "48865",
-      "posting_date": "Aug/04/2026",
-      "title": "GMGT 1010 A04 SESSIONAL",
-      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48865&Language=1"
     }
   ],
   "version": 3
