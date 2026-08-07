@@ -1,7 +1,7 @@
 {
   "initialized": true,
   "last_dispatch_utc": "2026-08-06T15:00:57+00:00",
-  "last_success_utc": "2026-08-07T11:33:53+00:00",
+  "last_success_utc": "2026-08-07T14:00:30+00:00",
   "pending_jobs": [
     {
       "id": "49007",
@@ -170,6 +170,12 @@
       "posting_date": "Aug/06/2026",
       "title": "GMGT 7210 Sessional Instructor Fall 2026",
       "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48963&Language=1"
+    },
+    {
+      "id": "49031",
+      "posting_date": "Aug/07/2026",
+      "title": "Teaching Assistant - CHSC 7320 - CUPE Unit 1",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=49031&Language=1"
     }
   ],
   "seen_ids": [
@@ -272,9 +278,16 @@
     "48972",
     "48970",
     "48969",
-    "48963"
+    "48963",
+    "49031"
   ],
   "seen_jobs": [
+    {
+      "id": "49031",
+      "posting_date": "Aug/07/2026",
+      "title": "Teaching Assistant - CHSC 7320 - CUPE Unit 1",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=49031&Language=1"
+    },
     {
       "id": "49007",
       "posting_date": "Aug/06/2026",
@@ -450,22 +463,34 @@
       "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48961&Language=1"
     },
     {
-      "id": "48955",
-      "posting_date": "Aug/05/2026",
-      "title": "Teaching Assistant - ENG 1430 B01",
-      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48955&Language=1"
-    },
-    {
-      "id": "48953",
+      "id": "48954",
       "posting_date": "Aug/05/2026",
       "title": "Teaching Assistant - ENG 1430 B02",
-      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48953&Language=1"
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48954&Language=1"
     },
     {
-      "id": "48952",
+      "id": "48951",
       "posting_date": "Aug/05/2026",
-      "title": "Teaching Assistant - ENG 1430 A02",
-      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48952&Language=1"
+      "title": "Grader/Marker CLAS 1520 (CUPE Student)",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48951&Language=1"
+    },
+    {
+      "id": "48950",
+      "posting_date": "Aug/05/2026",
+      "title": "Grader/Marker CLAS 1520 (CUPE Student)",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48950&Language=1"
+    },
+    {
+      "id": "48948",
+      "posting_date": "Aug/05/2026",
+      "title": "TA/Demo/TUR/Sem. Leaders - ANSC 0420 (CUPE Students)",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48948&Language=1"
+    },
+    {
+      "id": "48944",
+      "posting_date": "Aug/05/2026",
+      "title": "System and Data Engineer - IT4 (AESES)",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48944&Language=1"
     },
     {
       "id": "48942",
@@ -474,46 +499,28 @@
       "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48942&Language=1"
     },
     {
-      "id": "48941",
+      "id": "48933",
       "posting_date": "Aug/05/2026",
-      "title": "Admissions Officer - AA2 (AESES)",
-      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48941&Language=1"
+      "title": "Sessional Instructor - EDUA 5620 (Repost)",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48933&Language=1"
     },
     {
-      "id": "48940",
+      "id": "48932",
       "posting_date": "Aug/05/2026",
-      "title": "Grader/Marker CLAS 1520 (CUPE Student)",
-      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48940&Language=1"
+      "title": "TA/Demo/TUR/Sem. Leaders - PHIL 2170 (CUPE Students)",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48932&Language=1"
     },
     {
-      "id": "48939",
+      "id": "48931",
       "posting_date": "Aug/05/2026",
-      "title": "Grader/Marker CLAS 1270 A01 (CUPE Student)",
-      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48939&Language=1"
+      "title": "GMGT 2070 A01 Sessional",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48931&Language=1"
     },
     {
-      "id": "48938",
+      "id": "48929",
       "posting_date": "Aug/05/2026",
-      "title": "Grader/Marker CLAS 1280 (CUPE Student)",
-      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48938&Language=1"
-    },
-    {
-      "id": "48937",
-      "posting_date": "Aug/05/2026",
-      "title": "Grader/Marker CLAS 1270 A02 (CUPE Student)",
-      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48937&Language=1"
-    },
-    {
-      "id": "48936",
-      "posting_date": "Aug/05/2026",
-      "title": "TA (Teaching Assistant) LATN 1080 (CUPE Student)",
-      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48936&Language=1"
-    },
-    {
-      "id": "48935",
-      "posting_date": "Aug/05/2026",
-      "title": "Research & Laboratory Support Specialist - Tech 4 (AESES)",
-      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48935&Language=1"
+      "title": "Sessional Instructor - BIOE 7380",
+      "url": "https://viprecprod.ad.umanitoba.ca/DEFAULT.ASPX?REQ_ID=48929&Language=1"
     }
   ],
   "version": 3
