@@ -17,6 +17,7 @@ class WebAppTests(unittest.TestCase):
         self.tmp = tempfile.TemporaryDirectory()
         database = Path(self.tmp.name) / "test.db"
         self.telegram_calls = []
+        self.subscription_counter = 0
 
         def fake_telegram(method, payload):
             self.telegram_calls.append((method, payload))
@@ -48,10 +49,14 @@ class WebAppTests(unittest.TestCase):
         self.engine.dispose()
         self.tmp.cleanup()
 
-    def create_subscription(self, roles=None, keywords=None):
+    def create_subscription(self, roles=None, keywords=None, email=None):
+        self.subscription_counter += 1
         return self.client.post(
             "/api/subscriptions",
             json={
+                "email": email or (
+                    f"student{self.subscription_counter}@example.com"
+                ),
                 "role_types": roles or ["teaching_assistant"],
                 "keywords": keywords or ["COMP"],
                 "consent": True,
@@ -106,12 +111,16 @@ class WebAppTests(unittest.TestCase):
             json={"jobs": jobs},
         )
 
-    def test_home_loads_without_email_field(self):
+    def test_home_has_account_email_field_and_telegram_only_note(self):
         response = self.client.get("/")
         self.assertEqual(response.status_code, 200)
         self.assertIn(b"Create your job alert", response.data)
         self.assertIn(b"Create Telegram alert", response.data)
-        self.assertNotIn(b'type="email"', response.data)
+        self.assertIn(b'type="email"', response.data)
+        self.assertIn(
+            b"Job alerts are sent only through Telegram",
+            response.data,
+        )
         self.assertEqual(response.headers["X-Frame-Options"], "DENY")
         self.assertEqual(
             response.headers["X-Content-Type-Options"],
@@ -133,10 +142,27 @@ class WebAppTests(unittest.TestCase):
         )
         self.assertEqual(response.status_code, 415)
 
+    def test_subscription_requires_valid_email(self):
+        missing = self.client.post(
+            "/api/subscriptions",
+            json={
+                "role_types": ["teaching_assistant"],
+                "keywords": [],
+                "consent": True,
+            },
+        )
+        self.assertEqual(missing.status_code, 400)
+        self.assertIn("email", missing.get_json()["errors"])
+
+        invalid = self.create_subscription(email="not-an-email")
+        self.assertEqual(invalid.status_code, 400)
+        self.assertIn("email", invalid.get_json()["errors"])
+
     def test_subscription_requires_telegram_consent(self):
         response = self.client.post(
             "/api/subscriptions",
             json={
+                "email": "student@example.com",
                 "role_types": ["teaching_assistant"],
                 "keywords": [],
                 "consent": False,
@@ -158,8 +184,10 @@ class WebAppTests(unittest.TestCase):
         self.assertEqual(dispatch.status_code, 200)
         self.assertEqual(dispatch.get_json()["telegram_attempted"], 0)
 
-    def test_subscription_returns_private_telegram_link(self):
-        response = self.create_subscription()
+    def test_subscription_returns_private_link_and_stores_real_email(self):
+        response = self.create_subscription(
+            email="Student.Name@Example.COM"
+        )
         self.assertEqual(response.status_code, 201)
         payload = response.get_json()
         self.assertNotIn("email", payload)
@@ -173,9 +201,65 @@ class WebAppTests(unittest.TestCase):
         with Session(self.engine) as session:
             subscription = session.scalar(select(Subscription))
             self.assertIsNotNone(subscription)
-            self.assertTrue(
-                subscription.email.endswith("@alerts.invalid")
+            self.assertEqual(
+                subscription.email,
+                "student.name@example.com",
             )
+
+    def test_active_email_cannot_be_overwritten(self):
+        email = "student@example.com"
+        first = self.create_subscription(email=email).get_json()
+        self.connect_telegram(first["telegram_connect_url"])
+
+        second = self.create_subscription(
+            roles=["research"],
+            keywords=[],
+            email=email,
+        )
+        self.assertEqual(second.status_code, 409)
+        self.assertIn("email", second.get_json()["errors"])
+
+        with Session(self.engine) as session:
+            subscription = session.scalar(select(Subscription))
+            self.assertEqual(
+                subscription.role_types,
+                ["teaching_assistant"],
+            )
+
+    def test_stopped_email_can_be_reused(self):
+        email = "student@example.com"
+        first = self.create_subscription(email=email).get_json()
+        self.connect_telegram(first["telegram_connect_url"])
+
+        stop = self.client.post(
+            "/api/telegram/webhook",
+            headers={
+                "X-Telegram-Bot-Api-Secret-Token": "webhook-secret"
+            },
+            json={
+                "update_id": 20,
+                "message": {
+                    "message_id": 20,
+                    "text": "/stop",
+                    "chat": {"id": 12345, "type": "private"},
+                },
+            },
+        )
+        self.assertEqual(stop.status_code, 200)
+
+        replacement = self.create_subscription(
+            roles=["research"],
+            keywords=[],
+            email=email,
+        )
+        self.assertEqual(replacement.status_code, 201)
+
+        with Session(self.engine) as session:
+            subscriptions = list(session.scalars(select(Subscription)))
+            self.assertEqual(len(subscriptions), 1)
+            self.assertEqual(subscriptions[0].email, email)
+            self.assertEqual(subscriptions[0].role_types, ["research"])
+            self.assertFalse(subscriptions[0].active)
 
     def test_expired_unconnected_subscription_is_cleaned_up(self):
         self.create_subscription()
