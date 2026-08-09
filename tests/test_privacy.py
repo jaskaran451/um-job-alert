@@ -18,7 +18,7 @@ class TelegramPrivacyTests(unittest.TestCase):
 
             with Session(engine) as session:
                 subscription = Subscription(
-                    email="telegram-test@alerts.invalid",
+                    email="student@example.com",
                     active=False,
                 )
                 session.add(subscription)

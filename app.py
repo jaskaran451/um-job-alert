@@ -3,7 +3,7 @@ from __future__ import annotations
 import hmac
 import json
 import os
-import secrets
+import re
 from pathlib import Path
 from typing import Any
 
@@ -32,6 +32,7 @@ from telegram_service import (
 
 
 BASE_DIR = Path(__file__).resolve().parent
+EMAIL_PATTERN = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 ALLOWED_ROLE_TYPES = {
     "all",
     "teaching_assistant",
@@ -142,10 +143,13 @@ def create_app(test_config: dict[str, Any] | None = None) -> Flask:
         if payload.get("company"):
             return jsonify(message="Preferences saved."), 201
 
+        email = sanitize_email(payload.get("email"))
         role_types = sanitize_role_types(payload.get("role_types"))
         keywords = sanitize_keywords(payload.get("keywords"))
         errors: dict[str, str] = {}
 
+        if not email:
+            errors["email"] = "Enter a valid email address."
         if not role_types and not keywords:
             errors["preferences"] = (
                 "Choose at least one role type or keyword."
@@ -170,18 +174,35 @@ def create_app(test_config: dict[str, Any] | None = None) -> Flask:
 
         purge_expired_unconnected_subscriptions(engine)
 
-        internal_identifier = (
-            f"telegram-{secrets.token_urlsafe(18).lower()}@alerts.invalid"
-        )
         with Session(engine) as session:
-            subscription = Subscription(
-                email=internal_identifier,
-                role_types_json=json.dumps(role_types),
-                keywords_json=json.dumps(keywords),
-                active=False,
-                updated_at=utc_now(),
+            subscription = session.scalar(
+                select(Subscription).where(Subscription.email == email)
             )
-            session.add(subscription)
+
+            if subscription is not None and subscription.active:
+                return jsonify(
+                    message=(
+                        "An active subscription already uses this email. "
+                        "Use /stop in Telegram before creating a new alert."
+                    ),
+                    errors={
+                        "email": (
+                            "This email already has an active Telegram alert."
+                        )
+                    },
+                ), 409
+
+            if subscription is None:
+                subscription = Subscription(
+                    email=email,
+                    active=False,
+                )
+                session.add(subscription)
+
+            subscription.role_types_json = json.dumps(role_types)
+            subscription.keywords_json = json.dumps(keywords)
+            subscription.active = False
+            subscription.updated_at = utc_now()
             session.flush()
             subscription_id = subscription.id
             session.commit()
@@ -194,7 +215,7 @@ def create_app(test_config: dict[str, Any] | None = None) -> Flask:
 
         return jsonify(
             message=(
-                "Preferences saved. Connect Telegram to activate your alert."
+                "Subscription saved. Connect Telegram to activate your alert."
             ),
             role_types=role_types,
             keywords=keywords,
@@ -292,6 +313,13 @@ def purge_expired_unconnected_subscriptions(engine) -> int:
             session.commit()
 
     return removed
+
+
+def sanitize_email(value: Any) -> str:
+    email = str(value or "").strip().casefold()
+    if not email or len(email) > 254:
+        return ""
+    return email if EMAIL_PATTERN.fullmatch(email) else ""
 
 
 def sanitize_role_types(value: Any) -> list[str]:
