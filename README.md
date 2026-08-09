@@ -4,9 +4,10 @@ UM Job Alerts is an independent notification service that monitors public
 University of Manitoba job postings and sends personalized alerts through
 Telegram.
 
-Users select role categories and optional keywords, then connect a private
-Telegram chat. No email address, University account, or University password is
-required.
+Users enter an email address for their subscription record, select role
+categories and optional keywords, then connect a private Telegram chat. Job
+alerts are sent only through Telegram; the email address is not used for job
+alert delivery.
 
 > This project is not affiliated with, endorsed by, or operated by the
 > University of Manitoba.
@@ -19,7 +20,8 @@ required.
 - Detects new jobs by requisition number
 - Suppresses resurfaced old postings
 - Matches roles and custom keywords
-- Sends personalized Telegram alerts
+- Stores a real email address with each subscription record
+- Sends personalized job alerts only through Telegram
 - Uses short-lived private Telegram connection links
 - Supports `/status` and `/stop`
 - Prevents duplicate and partially repeated alert batches
@@ -80,12 +82,13 @@ service runs for the first time.
 
 ## Telegram user flow
 
-1. Choose role types and optional keywords on the website.
-2. Accept Telegram notifications.
-3. Click **Create Telegram alert**.
-4. Click **Connect Telegram**.
-5. Press **Start** in the bot.
-6. Receive only new jobs matching the saved preferences.
+1. Enter an email address for the subscription record.
+2. Choose role types and optional keywords on the website.
+3. Accept Telegram notifications.
+4. Click **Create Telegram alert**.
+5. Click **Connect Telegram**.
+6. Press **Start** in the bot.
+7. Receive only new jobs matching the saved preferences.
 
 Bot commands:
 
@@ -96,9 +99,12 @@ Bot commands:
 
 ## Privacy and security
 
-- No email address is collected.
+- The email address is stored only with the subscription record and is not used
+  to send job alerts.
+- Job alerts are delivered only through Telegram.
 - No University credentials are requested.
-- Only the Telegram chat ID needed for delivery is stored.
+- Only the Telegram chat ID needed for delivery is stored; Telegram profile
+  names are discarded.
 - Bot tokens and webhook secrets remain in Railway variables.
 - Connection tokens are random, short-lived, stored only as hashes, and removed after use.
 - `/stop` deactivates the subscription.
