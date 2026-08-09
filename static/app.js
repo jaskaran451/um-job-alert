@@ -1,6 +1,7 @@
 const form = document.querySelector('#subscription-form');
 
 if (form) {
+    const emailInput = document.querySelector('#email');
     const input = document.querySelector('#keyword-input');
     const list = document.querySelector('#keyword-list');
     const add = document.querySelector('#add-keyword');
@@ -93,7 +94,7 @@ if (form) {
     form.addEventListener('submit', async event => {
         event.preventDefault();
 
-        ['preferences', 'consent'].forEach(name => {
+        ['email', 'preferences', 'consent'].forEach(name => {
             const error = document.querySelector(`#${name}-error`);
             if (error) {
                 error.textContent = '';
@@ -110,6 +111,7 @@ if (form) {
         submitButton.disabled = true;
 
         const payload = {
+            email: emailInput.value.trim(),
             role_types: [
                 ...form.querySelectorAll(
                     'input[name="role_type"]:checked'
@@ -152,7 +154,7 @@ if (form) {
 
             message.className = 'message success';
             message.textContent = (
-                'Preferences saved. Connect Telegram below to activate your alert.'
+                'Subscription saved. Connect Telegram below to activate your alert.'
             );
 
             telegramLink.href = result.telegram_connect_url;
