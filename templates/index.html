@@ -20,11 +20,17 @@
       <div class="eyebrow"><span></span> Monitoring U of M careers every 30 minutes</div>
       <h1>Find the right U of M opportunity <em>before you miss it.</em></h1>
       <p>Choose the roles and keywords you care about. We monitor public postings and send matching opportunities directly to your Telegram chat.</p>
-      <div class="trust"><b>✓ No email required</b><b>✓ No UM password</b><b>✓ Free Telegram alerts</b></div>
+      <div class="trust"><b>✓ Telegram-only job alerts</b><b>✓ Email used only for subscription setup</b><b>✓ No UM password</b></div>
     </div>
     <div class="signup-card" id="subscribe">
-      <div class="card-head"><small>PERSONALIZED TELEGRAM ALERT</small><h2>Create your job alert</h2><p>Choose your preferences, then connect the Telegram bot to activate notifications.</p></div>
+      <div class="card-head"><small>PERSONALIZED TELEGRAM ALERT</small><h2>Create your job alert</h2><p>Enter your email for the subscription record, choose your preferences, then connect the Telegram bot to activate notifications.</p></div>
       <form id="subscription-form" novalidate>
+        <div class="email-field">
+          <label for="email">Email address</label>
+          <input id="email" name="email" type="email" maxlength="254" autocomplete="email" placeholder="you@example.com" required>
+          <p class="field-note">Used only to create and manage your subscription record. Job alerts are sent only through Telegram — we do not send job-alert emails.</p>
+          <p class="error" id="email-error"></p>
+        </div>
         <fieldset>
           <legend>What roles interest you?</legend>
           <div class="roles">
@@ -55,18 +61,18 @@
           <a id="telegram-connect-link" class="telegram-button" href="#" target="_blank" rel="noopener">Connect Telegram ↗</a>
         </section>
         {% if not telegram_available %}<p class="telegram-unavailable">Telegram alerts are temporarily unavailable while the bot is being configured.</p>{% endif %}
-        <p class="privacy">🔒 No email address is collected. Your Telegram chat ID is used only to deliver matching job alerts.</p>
+        <p class="privacy">🔒 Your email is stored only with your subscription record. Your Telegram chat ID is used only to deliver matching job alerts.</p>
       </form>
     </div>
   </section>
-  <section class="stats"><div><strong>30 min</strong><span>Monitoring interval</span></div><div><strong>{{ tracked_job_count }}</strong><span>Latest jobs tracked</span></div><div><strong>5</strong><span>Job boards checked</span></div><div><strong>Telegram</strong><span>Instant alert channel</span></div></section>
+  <section class="stats"><div><strong>30 min</strong><span>Monitoring interval</span></div><div><strong>{{ tracked_job_count }}</strong><span>Latest jobs tracked</span></div><div><strong>1</strong><span>Public portal monitored</span></div><div><strong>Telegram</strong><span>Only alert channel</span></div></section>
   <section class="latest shell" id="latest">
     <div class="section-head"><div><small>LIVE FROM THE MONITOR</small><h2>Recently detected postings</h2></div><a href="https://viprecprod.ad.umanitoba.ca/default" target="_blank" rel="noopener">Official job board ↗</a></div>
     <div class="jobs">
       {% for job in latest_jobs %}<article><div class="meta"><span>New</span><time>{{ job.posting_date }}</time></div><h3>{{ job.title }}</h3><p>Requisition {{ job.id }}</p><a href="{{ job.url }}" target="_blank" rel="noopener">View posting →</a></article>{% else %}<article class="empty"><h3>Waiting for the next update</h3><p>Recent postings will appear automatically.</p></article>{% endfor %}
     </div>
   </section>
-  <section class="how" id="how"><div class="shell"><div class="center"><small>SIMPLE BY DESIGN</small><h2>From new posting to your phone</h2><p>The service monitors only public pages and never asks for University credentials or an email address.</p></div><div class="steps"><article><i>01</i><b>◷</b><h3>We check regularly</h3><p>Five public career boards are scanned twice each hour.</p></article><article><i>02</i><b>⌕</b><h3>We match your choices</h3><p>New titles are compared with your selected roles and keywords.</p></article><article><i>03</i><b>➤</b><h3>Telegram notifies you</h3><p>Matching job links arrive directly in your connected Telegram chat.</p></article></div></div></section>
+  <section class="how" id="how"><div class="shell"><div class="center"><small>SIMPLE BY DESIGN</small><h2>From new posting to your phone</h2><p>The service monitors only public pages and never asks for University credentials. Your email is kept only with your subscription record; job alerts are delivered through Telegram.</p></div><div class="steps"><article><i>01</i><b>◷</b><h3>We check regularly</h3><p>The public recruitment portal is scanned twice each hour.</p></article><article><i>02</i><b>⌕</b><h3>We match your choices</h3><p>New titles are compared with your selected roles and keywords.</p></article><article><i>03</i><b>➤</b><h3>Telegram notifies you</h3><p>Matching job links arrive directly in your connected Telegram chat.</p></article></div></div></section>
 </main>
 <footer><div class="shell footer"><div><a class="brand" href="#top"><span class="brand-mark">♢</span><span>UM Job Alerts</span></a><p>Helping students and job seekers discover relevant public postings sooner.</p></div><p>Independent project. Not affiliated with, endorsed by, or operated by the University of Manitoba.</p></div></footer>
 </body>
